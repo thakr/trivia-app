@@ -133,7 +133,9 @@ io.on('connection', (socket) => {
 })
 
 
-
+app.get('/status', (req,res) => {
+  res.json({'status': '200'})
+})
 // if (process.env.NODE_ENV === 'production') {
 
 //   app.use(express.static('../client/build'))
