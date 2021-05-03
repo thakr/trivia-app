@@ -16,6 +16,7 @@ export default function Lobby({socket, startGame}) {
       setThisuser(user)
       console.log(user)
     })
+  // eslint-disable-next-line
   },[])
 
   return (

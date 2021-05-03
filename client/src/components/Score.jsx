@@ -11,6 +11,7 @@ export default function Score({socket, index,}) {
     socket.on('score-change', (score) => {
       setScore(score)
     })
+  // eslint-disable-next-line
   }, [])
   return (
     <div className="flex justify-between">

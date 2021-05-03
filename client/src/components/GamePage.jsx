@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react'
+import React, {useState} from 'react'
 import JoinLobby from './JoinLobby'
 import Game from './Game'
 import Lobby from './Lobby'

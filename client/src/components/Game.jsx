@@ -49,6 +49,7 @@ export default function Game({socket,questions}) {
         setFinished(true)
       }
     })
+  // eslint-disable-next-line
   }, [])
   
   
