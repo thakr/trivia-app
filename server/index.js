@@ -4,6 +4,8 @@ const http = require('http');
 const server = http.createServer(app);
 const { Server } = require("socket.io");
 const PORT = process.env.PORT || 8080
+const path = require('path');
+
 const io = new Server(server, {
   cors: {origin: "*"}
 });
@@ -16,7 +18,7 @@ io.on('connection', (socket) => {
   console.log('user connected')
 
   socket.on('join room', ({username, roomid}) => {
-    //implement socket ids
+    //implement ingame
     const user = {'userid': socket.id, username, 'roomid': roomid.toString(), 'owner': false, 'points': 0, 'finished': false, 'ingame': false}
     const room = {roomid, 'qIndex': 0, 'ingame': false, 'timerOn': false, 'allFinished': false, 'timer': null, 'startTimer': function () {
       let secs = 20
