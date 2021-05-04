@@ -5,7 +5,7 @@ import Lobby from './Lobby'
 import Loader from "react-loader-spinner";
 import io from 'socket.io-client'
 
-const socket = io('http://localhost:8080')
+const socket = io('http://159.65.253.185:8080/')
 const axios = require('axios')
 
 export default function GamePage({match}) {
