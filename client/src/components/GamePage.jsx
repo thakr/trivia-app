@@ -5,7 +5,7 @@ import Lobby from './Lobby'
 import Loader from "react-loader-spinner";
 import io from 'socket.io-client'
 
-const socket = io('https://triviahit.games/')
+const socket = io('/')
 const axios = require('axios')
 
 export default function GamePage({match}) {
