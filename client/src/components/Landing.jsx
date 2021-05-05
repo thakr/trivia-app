@@ -3,7 +3,7 @@ import bg from '../img/bg.svg'
 const axios = require('axios')
 
 export default function Landing() {
-
+  console.log(process.env.NODE_ENV)
   const [buttonInput, setButtonInput] = useState(false)
   const [roomid, setRoomId] = useState('')
   const handleStartRoom = () => {
@@ -19,7 +19,7 @@ export default function Landing() {
   }
   const formSubmit = (event) => {
     event.preventDefault()
-    window.location.replace(`/room/${roomid}`)
+    window.open(`/room/${roomid}`, '_self')
   }
   return (   
     <div className="flex flex-col justify-center items-center min-h-screen" style={{backgroundImage: `url(${bg})`, backgroundSize: 'cover', backgroundPosition: '50% 50%'}}>

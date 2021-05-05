@@ -15,7 +15,7 @@ export default function GamePage({match}) {
   })
   useEffect(() => {
     socket.emit('in-room', match.params.id)
-    socket.on('no-room', () => {console.log('no room'); setView('No room was found.')})
+    socket.on('no-room', () => {setView('No room was found.')})
   }, [match])
   const startGame = () => {
     setLoading(true)

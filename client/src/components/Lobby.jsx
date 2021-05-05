@@ -8,7 +8,6 @@ export default function Lobby({socket, startGame}) {
     socket.emit('get-users')
     socket.emit('get-single-user')
     socket.on('roomUsers', ({roomid, users}) => {
-      console.log(users)
       setUsers(users)
     })
 
@@ -17,7 +16,6 @@ export default function Lobby({socket, startGame}) {
     })
     socket.on('get-this-user', (user) => {
       setThisuser(user)
-      console.log(user)
     })
   // eslint-disable-next-line
   },[])

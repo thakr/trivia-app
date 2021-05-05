@@ -11,15 +11,7 @@ export default function Game({socket,questions, toLobby}) {
   const [picked, setPicked] = useState('')
   const [usersData, setUsersData] = useState([])
 
-  useEffect(() => {
-    console.log(index)
-    if (index < 10) {
-      console.log('hi')
-      //socket.emit('start-timer')
-    } else {
-      console.log('FINISHED GAME')
-    }
-  }, [index])
+
   const shuffleAnswers = (arr) => {
     arr.sort(() => (Math.random() > .5) ? 1 : -1);
     return(arr)
@@ -30,9 +22,7 @@ export default function Game({socket,questions, toLobby}) {
     socket.on('all-users-finished-question', (nextQIndex) => {
       
       if (index < 10) {
-        console.log(nextQIndex)
         setTimeout(() => {
-          console.log('calling')
           setPicked('')
           setFinished(false)
           setIndex(nextQIndex) 
