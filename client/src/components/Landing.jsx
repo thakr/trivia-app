@@ -10,7 +10,7 @@ export default function Landing() {
     axios.get(process.env.NODE_ENV === 'development' ? 'http://localhost:8080/api/get-room' : '/api/get-room')
       .then(function (response) {
         if (response) {
-          window.open(`/room/${response.data.room}`, '_self')
+          console.log(response)
         };
       })
       .catch(function (error) {
