@@ -179,15 +179,10 @@ io.on('connection', (socket) => {
 app.get('/status', (req,res) => {
   res.json({'status': '200'})
 })
-if (process.env.NODE_ENV === 'production') {
 
-  app.use(express.static('../client/build'))
-  app.get('*', (req,res) => {
-    
-    res.sendFile(path.resolve('../client', 'build', 'index.html'))
-  })
-}
 app.get('/api/get-room', (req,res) => {
+  console.log('get room req')
+  let val = Math.random().toString(36).substring(2, 5) + Math.random().toString(36).substring(2, 5);
   const room = {'roomid': null, 'qIndex': 0, 'ingame': false, 'timerOn': false, 'allFinished': false, 'timer': null, 'startTimer': function () {
     let secs = 20
     this.timer = setInterval(() => {
@@ -201,8 +196,7 @@ app.get('/api/get-room', (req,res) => {
   }, 'stopTimer': function () { 
     clearInterval(this.timer)
   }}
-  let val = Math.random().toString(36).substring(2, 5) + Math.random().toString(36).substring(2, 5);
-  if (rooms.filter(room => room.roomid = val).length === 0) {
+  if (rooms.filter(room => room.roomid === val).length === 0) {
     room.roomid = val
     rooms.push(room)
     res.json({'room': val})
@@ -210,6 +204,16 @@ app.get('/api/get-room', (req,res) => {
     console.log('same')
   }  
 })
+
+if (process.env.NODE_ENV === 'production') {
+
+  app.use(express.static('../client/build'))
+  app.get('*', (req,res) => {
+    
+    res.sendFile(path.resolve('../client', 'build', 'index.html'))
+  })
+}
+
 
 server.listen(PORT, () => {
   console.log(`listening on ${PORT}`);
