@@ -199,7 +199,7 @@ app.get('/api/get-room', (req,res) => {
   if (rooms.filter(room => room.roomid === val).length === 0) {
     room.roomid = val
     rooms.push(room)
-    res.json({'room': val})
+    res.redirect(`/room/${val}`)
   } else {
     console.log('same')
   }  
