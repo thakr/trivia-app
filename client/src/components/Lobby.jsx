@@ -5,10 +5,13 @@ export default function Lobby({socket, startGame}) {
   const [ingame, setIngame] = useState(false)
   const [thisuser, setThisuser] = useState()
   useEffect(() => {
+    socket.emit('get-users')
+    socket.emit('get-single-user')
     socket.on('roomUsers', ({roomid, users}) => {
       console.log(users)
       setUsers(users)
     })
+
     socket.on('ingame', (val) => {
       setIngame(val)
     })

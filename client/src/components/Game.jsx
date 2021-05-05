@@ -3,7 +3,7 @@ import Score from './Score'
 import Answers from './Answers'
 
 
-export default function Game({socket,questions}) {
+export default function Game({socket,questions, toLobby}) {
   
   const [answers,setAnswers] = useState([])
   const [index, setIndex] = useState(0)
@@ -82,11 +82,14 @@ export default function Game({socket,questions}) {
           })}
         </> }
       </> : 
+      <>
       <p>Quiz finished. Leaderboard: <br />
       {usersData.map(v => {
         return(<p>{v.username}: {v.points}</p>)
       })}
       </p>
+      <p className="cursor-pointer" onClick={toLobby}>Back to lobby</p>
+      </>
       }
 
     </div>

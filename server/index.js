@@ -5,50 +5,79 @@ const server = http.createServer(app);
 const { Server } = require("socket.io");
 const PORT = process.env.PORT || 8080
 const path = require('path');
+const cors = require('cors');
 
 const io = new Server(server, {
   cors: {origin: "*"}
 });
+if (process.env.NODE_ENV !== 'production') app.use(cors());
 
 const users = []
 const rooms = []
 
-
 io.on('connection', (socket) => {
   console.log('user connected')
-
-  socket.on('join room', ({username, roomid}) => {
-    //implement ingame
-    const user = {'userid': socket.id, username, 'roomid': roomid.toString(), 'owner': false, 'points': 0, 'finished': false, 'ingame': false}
-    const room = {roomid, 'qIndex': 0, 'ingame': false, 'timerOn': false, 'allFinished': false, 'timer': null, 'startTimer': function () {
-      let secs = 20
-      this.timer = setInterval(() => {
-        io.to(this.roomid).emit('timer-change', secs)
-        secs --
-        if (secs === 0) {
-          io.to(this.roomid).emit('timer-finished')
-          clearInterval(this.timer)
+  socket.on('in-room', (roomid) => {
+    if (rooms.findIndex(newRoom => newRoom.roomid === roomid) === -1) {
+      socket.emit('no-room')
+    }
+    socket.on('disconnect', () => {
+      const index = rooms.findIndex(r => r.roomid === roomid.toString())
+      if (index !== -1) {
+        if (users.filter(u => u.roomid === roomid.toString()).length === 0) {
+          rooms.splice(index, 1)
+          console.log(rooms)
         }
-      }, 1000)
-    }, 'stopTimer': function () { 
-      clearInterval(this.timer)
-    }}
+      }
+      
+    })
+  })
+  socket.on('join room', ({username, roomid}) => {
+    const user = {'userid': socket.id, username, 'roomid': roomid.toString(), 'owner': false, 'points': 0, 'finished': false, 'ingame': false}
+    // const room = {roomid, 'qIndex': 0, 'ingame': false, 'timerOn': false, 'allFinished': false, 'timer': null, 'startTimer': function () {
+    //   let secs = 20
+    //   this.timer = setInterval(() => {
+    //     io.to(this.roomid).emit('timer-change', secs)
+    //     secs --
+    //     if (secs === 0) {
+    //       io.to(this.roomid).emit('timer-finished')
+    //       clearInterval(this.timer)
+    //     }
+    //   }, 1000)
+    // }, 'stopTimer': function () { 
+    //   clearInterval(this.timer)
+    // }}
 
-    socket.join(user.roomid)
     
-    if (rooms.findIndex(newRoom => newRoom.roomid === user.roomid) === -1) {
-      rooms.push(room)
-      user.owner = true
-      users.push(user)
+    if (rooms.findIndex(newRoom => newRoom.roomid === roomid.toString()) === -1) {
+      socket.emit('no-room')
     } else {
-      user.owner = false
-      users.push(user)
+      
+      socket.join(user.roomid)
+      if (users.findIndex(u => u.roomid === user.roomid) === -1) {
+        user.owner = true
+        users.push(user)
+      } else {
+        user.owner = false
+        users.push(user)
+      }
       if (rooms[rooms.findIndex(newRoom => newRoom.roomid === user.roomid)].ingame === true) {
         socket.emit('ingame', true)
       }
     }
+    // if (rooms.findIndex(newRoom => newRoom.roomid === user.roomid) === -1) {
+    //   rooms.push(room)
+    //   user.owner = true
+    //   users.push(user)
+    // } else {
+    //   user.owner = false
+    //   users.push(user)
+    //   if (rooms[rooms.findIndex(newRoom => newRoom.roomid === user.roomid)].ingame === true) {
+    //     socket.emit('ingame', true)
+    //   }
+    // }
+    socket.on('get-single-user', () => socket.emit('get-this-user', user))
     
-    socket.emit('get-this-user', user)
 
     io.to(user.roomid).emit('roomUsers', {
       roomid: user.roomid,
@@ -64,6 +93,7 @@ io.on('connection', (socket) => {
       console.log(user.username + " started game!")
       rooms[roomindex].startTimer()
       rooms[roomindex].ingame = true
+      usersInRoom.map(u => {u.ingame = true; console.log(u)})
     })
 
     socket.on('user-finished', ({correct}) => {
@@ -77,7 +107,7 @@ io.on('connection', (socket) => {
         socket.emit('score-change', users[index].points)
         users[index].finished = true
       }
-      const usersInRoom = users.filter(newUser => newUser.roomid === user.roomid)
+      const usersInRoom = users.filter(newUser => newUser.roomid === user.roomid && newUser.ingame === true)
       rooms[rindex].allFinished = true
       usersInRoom.map(v => {
         if (v.finished === false) {
@@ -89,7 +119,7 @@ io.on('connection', (socket) => {
         if (rindex !== -1) {
           rooms[rindex].qIndex ++
         }
-        io.to(room.roomid).emit('all-users-finished-question', rooms[rindex].qIndex)
+        io.to(rooms[rindex].roomid).emit('all-users-finished-question', rooms[rindex].qIndex)
         rooms[rindex].stopTimer()
         rooms[rindex].startTimer()
         usersInRoom.map(v => v.finished = false)
@@ -103,13 +133,24 @@ io.on('connection', (socket) => {
           console.log(rooms)
           console.log('ROOM '+ rooms[rindex].roomid + ' FINISHED')
           rooms[rindex].stopTimer()
-          rooms.splice(rindex,1)
+          rooms[rindex].qIndex = 0
+          rooms[rindex].ingame = false
+          rooms[rindex].allFinished = false
+          rooms[rindex].timerOn = false
+          usersInRoom.map(v => {
+            v.ingame= false
+          })
         }
         console.log(rooms)
         socket.emit('ingame', false)
       }
     })
-
+    socket.on('get-users', () => {
+      io.to(user.roomid).emit('roomUsers', {
+        roomid: user.roomid,
+        users: users.filter(newUser => newUser.roomid === user.roomid)
+      })
+    })
     socket.on('disconnect', () => {
       if (user) {
         const index = users.findIndex(newUser => newUser.userid === user.userid)
@@ -146,6 +187,29 @@ if (process.env.NODE_ENV === 'production') {
     res.sendFile(path.resolve('../client', 'build', 'index.html'))
   })
 }
+app.get('/api/get-room', (req,res) => {
+  const room = {'roomid': null, 'qIndex': 0, 'ingame': false, 'timerOn': false, 'allFinished': false, 'timer': null, 'startTimer': function () {
+    let secs = 20
+    this.timer = setInterval(() => {
+      io.to(this.roomid).emit('timer-change', secs)
+      secs --
+      if (secs === 0) {
+        io.to(this.roomid).emit('timer-finished')
+        clearInterval(this.timer)
+      }
+    }, 1000)
+  }, 'stopTimer': function () { 
+    clearInterval(this.timer)
+  }}
+  let val = Math.random().toString(36).substring(2, 5) + Math.random().toString(36).substring(2, 5);
+  if (rooms.filter(room => room.roomid = val).length === 0) {
+    room.roomid = val
+    rooms.push(room)
+    res.json({'room': val})
+  } else {
+    console.log('same')
+  }  
+})
 
 server.listen(PORT, () => {
   console.log(`listening on ${PORT}`);
