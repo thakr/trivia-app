@@ -14,7 +14,16 @@ if (process.env.NODE_ENV !== 'production') app.use(cors());
 
 const users = []
 const rooms = []
-
+const maxLifespan = 30000
+// check once per second
+setInterval(function checkItems(){
+  rooms.map(function(item,index){
+    if(Date.now() - maxLifespan > item.createdAt && users.filter(u => u.roomid === item.roomid).length === 0){
+      console.log(`removing ${item.roomid}`)
+      rooms.splice(index, 1) // remove first item
+    }
+  })
+}, 1000)
 io.on('connection', (socket) => {
   console.log('user connected')
   socket.on('in-room', (roomid) => {
@@ -183,7 +192,7 @@ app.get('/status', (req,res) => {
 app.get('/api/get-room', (req,res) => {
   console.log('get room req')
   let val = Math.random().toString(36).substring(2, 5) + Math.random().toString(36).substring(2, 5);
-  const room = {'roomid': null, 'qIndex': 0, 'ingame': false, 'timerOn': false, 'allFinished': false, 'timer': null, 'startTimer': function () {
+  const room = {'createdAt': Date.now(), 'roomid': null, 'qIndex': 0, 'ingame': false, 'timerOn': false, 'allFinished': false, 'timer': null, 'startTimer': function () {
     let secs = 20
     this.timer = setInterval(() => {
       io.to(this.roomid).emit('timer-change', secs)
@@ -199,7 +208,7 @@ app.get('/api/get-room', (req,res) => {
   if (rooms.filter(room => room.roomid === val).length === 0) {
     room.roomid = val
     rooms.push(room)
-    res.redirect(`/room/${val}`)
+    res.json({'room': val})
   } else {
     console.log('same')
   }  
