@@ -15,6 +15,7 @@ export default function Lobby({socket, startGame, showCopied}) {
     })
 
     socket.on('ingame', (val) => {
+      console.log(val)
       setIngame(val)
     })
     socket.on('get-this-user', (user) => {
@@ -38,7 +39,7 @@ export default function Lobby({socket, startGame, showCopied}) {
         </div>
         
         {thisuser ? 
-        ingame || !thisuser.owner ? <button className="bg-gray-400 text-white font-semibold px-4 py-2 rounded-lg shadow-md hover:cursor-default ml-12 sm:ml-0" disabled>Start Game</button>:
+        ingame ? <button className="bg-gray-400 text-white font-semibold px-4 py-2 rounded-lg shadow-md hover:cursor-default ml-12 sm:ml-0" disabled>In Game</button>: !thisuser.owner ? <button className="bg-gray-400 text-white font-semibold px-4 py-2 rounded-lg shadow-md hover:cursor-default ml-12 sm:ml-0" disabled>Start Game</button>:
         <button className="bg-gray-800 text-white font-semibold px-4 py-2 rounded-lg shadow-md transform hover:scale-105 transition-transform:ease-in-out duration-75 ml-12 sm:ml-0" onClick={startGame}>Start Game</button>
         : <p>loading...</p>}
         

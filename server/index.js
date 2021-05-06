@@ -130,7 +130,7 @@ io.on('connection', (socket) => {
           })
         }
         console.log(rooms)
-        socket.emit('ingame', false)
+        io.to(user.roomid).emit('ingame', false)
       }
     })
     socket.on('get-users', () => {
