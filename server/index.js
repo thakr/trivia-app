@@ -43,20 +43,6 @@ io.on('connection', (socket) => {
   })
   socket.on('join room', ({username, roomid}) => {
     const user = {'userid': socket.id, username, 'roomid': roomid.toString(), 'owner': false, 'points': 0, 'finished': false, 'ingame': false}
-    // const room = {roomid, 'qIndex': 0, 'ingame': false, 'timerOn': false, 'allFinished': false, 'timer': null, 'startTimer': function () {
-    //   let secs = 20
-    //   this.timer = setInterval(() => {
-    //     io.to(this.roomid).emit('timer-change', secs)
-    //     secs --
-    //     if (secs === 0) {
-    //       io.to(this.roomid).emit('timer-finished')
-    //       clearInterval(this.timer)
-    //     }
-    //   }, 1000)
-    // }, 'stopTimer': function () { 
-    //   clearInterval(this.timer)
-    // }}
-
     
     if (rooms.findIndex(newRoom => newRoom.roomid === roomid.toString()) === -1) {
       socket.emit('no-room')
@@ -74,17 +60,7 @@ io.on('connection', (socket) => {
         socket.emit('ingame', true)
       }
     }
-    // if (rooms.findIndex(newRoom => newRoom.roomid === user.roomid) === -1) {
-    //   rooms.push(room)
-    //   user.owner = true
-    //   users.push(user)
-    // } else {
-    //   user.owner = false
-    //   users.push(user)
-    //   if (rooms[rooms.findIndex(newRoom => newRoom.roomid === user.roomid)].ingame === true) {
-    //     socket.emit('ingame', true)
-    //   }
-    // }
+
     socket.on('get-single-user', () => socket.emit('get-this-user', user))
     
 
@@ -93,15 +69,15 @@ io.on('connection', (socket) => {
       users: users.filter(newUser => newUser.roomid === user.roomid)
     })
 
-    const roomindex = rooms.findIndex(newRoom => newRoom.roomid === user.roomid)
 
     socket.on('start-game', (questions) => {
+      const rindex = rooms.findIndex(newRoom => newRoom.roomid === user.roomid)
       io.to(user.roomid).emit('start-game', questions)
       const usersInRoom = users.filter(newUser => newUser.roomid === user.roomid)
       io.to(user.roomid).emit('get-users-data', usersInRoom)
       console.log(user.username + " started game!")
-      rooms[roomindex].startTimer()
-      rooms[roomindex].ingame = true
+      rooms[rindex].startTimer()
+      rooms[rindex].ingame = true
       usersInRoom.map(u => {u.ingame = true; console.log(u)})
     })
 
@@ -131,7 +107,9 @@ io.on('connection', (socket) => {
         io.to(rooms[rindex].roomid).emit('all-users-finished-question', rooms[rindex].qIndex)
         rooms[rindex].stopTimer()
         rooms[rindex].startTimer()
-        usersInRoom.map(v => v.finished = false)
+        usersInRoom.map(v => {
+          v.finished = false 
+        })
       }
       io.to(user.roomid).emit('get-users-data', usersInRoom)
       console.log(`${user.username} finished and was ${correct ? 'correct' : 'incorrect'}`)
@@ -148,6 +126,7 @@ io.on('connection', (socket) => {
           rooms[rindex].timerOn = false
           usersInRoom.map(v => {
             v.ingame= false
+            v.points = 0
           })
         }
         console.log(rooms)
@@ -160,11 +139,26 @@ io.on('connection', (socket) => {
         users: users.filter(newUser => newUser.roomid === user.roomid)
       })
     })
+    // socket.on('to-lobby', () => {
+
+    // })
     socket.on('disconnect', () => {
+      const rindex = rooms.findIndex(newRoom => newRoom.roomid === user.roomid)
+      //add remove room on owner leave
       if (user) {
         const index = users.findIndex(newUser => newUser.userid === user.userid)
+        
         if (index !== -1) {
           users.splice(index,1)
+          if (user.owner == true) {
+            otherusers = users.filter(newUser => newUser.roomid === user.roomid)
+            if (otherusers.length > 0) {
+              otherusers[0].owner = true
+              console.log(users)
+              socket.emit('get-this-user', user)
+            }
+            
+          }
         }
         console.log(`${user.username} disconnected`)
         io.to(user.roomid).emit('roomUsers', {
@@ -172,9 +166,9 @@ io.on('connection', (socket) => {
           users: users.filter(newUser => newUser.roomid === user.roomid)
         })
         io.to(user.roomid).emit('get-users-data', users.filter(newUser => newUser.roomid === user.roomid))
-        if (rooms[roomindex]) {
-          if (users.filter(nUser => nUser.roomid === rooms[roomindex].roomid).length === 0) {
-            rooms.splice(roomindex,1)
+        if (rooms[rindex]) {
+          if (users.filter(nUser => nUser.roomid === rooms[rindex].roomid).length === 0) {
+            rooms.splice(rindex,1)
             console.log('everyone left, removing room.')
           }
         }

@@ -78,7 +78,7 @@ export default function Game({socket,questions, toLobby}) {
         return(<p>{v.username}: {v.points}</p>)
       })}
       </p>
-      <p className="cursor-pointer" onClick={toLobby}>Back to lobby</p>
+      <p className="cursor-pointer" onClick={toLobby}>← Back to lobby</p>
       </>
       }
 

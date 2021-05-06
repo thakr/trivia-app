@@ -4,13 +4,21 @@ import Game from './Game'
 import Lobby from './Lobby'
 import Loader from "react-loader-spinner";
 import io from 'socket.io-client'
+import CopiedBox from './CopiedBox'
+import {AnimatePresence} from 'framer-motion'
+
 const socket = io(process.env.NODE_ENV === 'development' ? 'http://localhost:8080/' : '/')
 const axios = require('axios')
 
 export default function GamePage({match}) {
   const [loading, setLoading] = useState(false)
-  const toLobby = () => setView(<Lobby socket={socket} startGame={startGame}/>)
+  const [showCopied, setShowCopied] = useState(false)
+  const toLobby = () => {
+    setView(<Lobby socket={socket} startGame={startGame}/>)
+    // socket.emit('to-lobby')
+  }
   socket.on('start-game', (questions) => {
+    setView(<Loader type="ThreeDots" color="#00BFFF" height={80} width={80} />)
     setView(<Game socket={socket} questions = {questions} toLobby={toLobby}/>)
   })
   useEffect(() => {
@@ -31,14 +39,19 @@ export default function GamePage({match}) {
       });
     
   }
+
   const handleJoinRoom = (username) => {
     socket.emit('join room', {'username': username, 'roomid': match.params.id})
-    setView(<Lobby socket={socket} startGame={startGame}/>)
+    setView(<Lobby socket={socket} startGame={startGame} showCopied={() => {
+      setShowCopied(true)
+      setTimeout(() => setShowCopied(false), 3000)
+    }}/>)
   }
 
   const [view, setView] = useState(<JoinLobby joinRoom={handleJoinRoom}/>)
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-200 to-blue-700">
+      <AnimatePresence>{showCopied && <CopiedBox />}</AnimatePresence>
       <div className="flex justify-center items-center min-h-screen">
         <div className="bg-white shadow-xl px-10 py-8 rounded-xl max-w-2xl min-w-4">  
           {!loading? view : <Loader type="ThreeDots" color="#00BFFF" height={80} width={80} />}
