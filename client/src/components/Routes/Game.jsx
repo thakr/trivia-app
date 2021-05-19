@@ -28,17 +28,17 @@ export default function Game({location}) {
       }
     })
     socket.on('category', ({category, index}) => {
-      console.log('cat')
       setTimeout(() => {
         setQuestionIndex(index)
         setView(<p>Loading</p>)
         setView(<Question category={category} question={null} answers={null} socket={socket} user={location.user} players={playersRef.current} leader={location.leader}/>)
         
-        if (location.leader){console.log('starting cat timer'); socket.emit('start-timer', 5)}
+        if (location.leader) {socket.emit('start-timer', 5)}
       }, 3000)
       
     })
     socket.on('answer-question', ({id, question, answers}) => {
+      console.log('ans wqq')
       if (id === location.user.id) {
         setView(<Question category={question.category} question={question} answers={answers} socket={socket} user={location.user} players={playersRef.current} leader={location.leader}/>)
       }

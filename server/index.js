@@ -93,7 +93,7 @@ app.post('/api/signup', (req, res) => {
                   email: email
                 })
                 newUser.save().then(newUser => {
-                  const userData = {username: user.username, email: user.email, id: user.id, elo: user.elo, gamesPlayed: user.gamesPlayed, wins: user.wins}
+                  const userData = {username: newUser.username, email: newUser.email, id: newUser.id, elo: newUser.elo, gamesPlayed: newUser.gamesPlayed, wins: newUser.wins}
                   const token = jwt.sign(userData, process.env.JWTSECRET, {
                     expiresIn: 300, //5 mins
                   })
@@ -203,6 +203,7 @@ io.on('connection', (socket) => {
     })
     const room = igplayers[igindex].room
     const roomindex = igrooms.findIndex(v => v.room === room)
+    if (!igrooms[roomindex]) return null
     axios.get(`https://opentdb.com/api.php?amount=10&difficulty=${difficulty}`)
     .then(res => {
       igrooms[roomindex].questions = res.data.results
@@ -224,11 +225,11 @@ io.on('connection', (socket) => {
           
           io.to(room).emit('timer', igrooms[roomindex].timer)
           console.log(igrooms[roomindex].timer)
-          igrooms[roomindex].timer --
           if (igrooms[roomindex].timer === 0) {
             io.to(room).emit('timer-done')
             clearInterval(igrooms[roomindex].roomtimer)
           }
+          igrooms[roomindex].timer --
         }
       }, 1000)
       
@@ -247,24 +248,24 @@ io.on('connection', (socket) => {
     const room = igplayers[igindex].room
     console.log(room)
     const roomindex = igrooms.findIndex(v => v.room === room)
-    clearInterval(igrooms[roomindex].roomtimer)
-    
-    if (igrooms[igindex]) {
-      console.log('emmitting answer q')
-      if (!igrooms[roomindex].userchosen) {
-        igrooms[roomindex].userchosen = true
-        correctanswer = igrooms[roomindex].questions[igrooms[roomindex].index].correct_answer
-        let answers = igrooms[roomindex].questions[igrooms[roomindex].index].incorrect_answers
-        answers.push(correctanswer)
-        answers.sort(() => Math.random() - 0.5)
-        
-        io.to(room).emit('answer-question', {id: userData.id, username: userData.username, question: igrooms[roomindex].questions[igrooms[roomindex].index].question, answers: answers})
-      }
+    if (igrooms[roomindex].roomtimer) {
+      clearInterval(igrooms[roomindex].roomtimer)
     }
-    
+    if (!igrooms[roomindex]) return null
+    console.log('emmitting answer q')
+    if (!igrooms[roomindex].userchosen) {
+      igrooms[roomindex].userchosen = true
+      correctanswer = igrooms[roomindex].questions[igrooms[roomindex].index].correct_answer
+      let answers = igrooms[roomindex].questions[igrooms[roomindex].index].incorrect_answers
+      answers.push(correctanswer)
+      answers.sort(() => Math.random() - 0.5)
+      
+      io.to(room).emit('answer-question', {id: userData.id, username: userData.username, question: igrooms[roomindex].questions[igrooms[roomindex].index].question, answers: answers})
+    }  
   })
 
   socket.on('answer-question', (answer) => {
+    console.log('answer-called')
     const igindex = igplayers.findIndex(v => v.id === userData.id)
     const room = igplayers[igindex].room
     const roomindex = igrooms.findIndex(v => v.room === room)
@@ -274,20 +275,20 @@ io.on('connection', (socket) => {
         igplayers[igindex].points = igplayers[igindex].points + 1
         igplayers[igindex].elo = igplayers[igindex].elo + 1
         igrooms[roomindex].index ++
-        if (igrooms[roomindex].index < 2) {
+        if (igrooms[roomindex].index < 10) {
           const igfilter = igplayers.filter(p => p.room === room)
           io.to(room).emit('players', {players: igfilter, first: false})
           io.to(room).emit('category', {category: igrooms[roomindex].questions[igrooms[roomindex].index].category, index: igrooms[roomindex].index})
         } else {
           const igfilter = igplayers.filter(p => p.room === room)
           if (igfilter[0].points > igfilter[1].points) {
-            igfilter[0].elo = igfilter[0].elo + 15
-            igfilter[1].elo = igfilter[1].elo - 10
+            igfilter[0].elo = igfilter[0].elo + 5
+            igfilter[1].elo = igfilter[1].elo - 3
             saveElo(igfilter[0], igfilter[1], igfilter[0])
           }
           if (igfilter[0].points < igfilter[1].points) {
-            igfilter[1].elo = igfilter[1].elo + 15
-            igfilter[0].elo = igfilter[0].elo - 10
+            igfilter[1].elo = igfilter[1].elo + 5
+            igfilter[0].elo = igfilter[0].elo - 3
             saveElo(igfilter[0], igfilter[1], igfilter[1])
           }
           if (igfilter[0].points === igfilter[1].points) {
@@ -304,20 +305,20 @@ io.on('connection', (socket) => {
         igplayers[igindex].points = igplayers[igindex].points - 1
         igplayers[igindex].elo = igplayers[igindex].elo - 1
         igrooms[roomindex].index ++
-        if (igrooms[roomindex].index < 2) {
+        if (igrooms[roomindex].index < 10) {
           const igfilter = igplayers.filter(p => p.room === room)
           io.to(room).emit('players', {players: igfilter, first: false})
           io.to(room).emit('category', {category: igrooms[roomindex].questions[igrooms[roomindex].index].category, index: igrooms[roomindex].index})
         } else{ 
           const igfilter = igplayers.filter(p => p.room === room)
           if (igfilter[0].points > igfilter[1].points) {
-            igfilter[0].elo = igfilter[0].elo + 15
-            igfilter[1].elo = igfilter[1].elo - 10
+            igfilter[0].elo = igfilter[0].elo + 5
+            igfilter[1].elo = igfilter[1].elo - 3
             saveElo(igfilter[0], igfilter[1], igfilter[0])
           }
           if (igfilter[0].points < igfilter[1].points) {
-            igfilter[1].elo = igfilter[1].elo + 15
-            igfilter[0].elo = igfilter[0].elo - 10
+            igfilter[1].elo = igfilter[1].elo + 5
+            igfilter[0].elo = igfilter[0].elo - 3
             saveElo(igfilter[0], igfilter[1], igfilter[1])
           }
           if (igfilter[0].points === igfilter[1].points) {
@@ -333,21 +334,22 @@ io.on('connection', (socket) => {
       } 
       socket.emit('answer', correctanswer)
     } else {
+      console.log('no answer')
       igrooms[roomindex].index ++
-      if (igrooms[roomindex].index < 2) {
+      if (igrooms[roomindex].index < 10) {
         const igfilter = igplayers.filter(p => p.room === room)
         io.to(room).emit('players', {players: igfilter, first: false})
         io.to(room).emit('category', {category: igrooms[roomindex].questions[igrooms[roomindex].index].category, index: igrooms[roomindex].index})
       } else{ 
         const igfilter = igplayers.filter(p => p.room === room)
         if (igfilter[0].points > igfilter[1].points) {
-          igfilter[0].elo = igfilter[0].elo + 15
-          igfilter[1].elo = igfilter[1].elo - 10
+          igfilter[0].elo = igfilter[0].elo + 5
+          igfilter[1].elo = igfilter[1].elo - 3
           saveElo(igfilter[0], igfilter[1], igfilter[0])
         }
         if (igfilter[0].points < igfilter[1].points) {
-          igfilter[1].elo = igfilter[1].elo + 15
-          igfilter[0].elo = igfilter[0].elo - 10
+          igfilter[1].elo = igfilter[1].elo + 5
+          igfilter[0].elo = igfilter[0].elo - 3
           saveElo(igfilter[0], igfilter[1], igfilter[1])
         }
         if (igfilter[0].points === igfilter[1].points) {

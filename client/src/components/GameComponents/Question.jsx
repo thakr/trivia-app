@@ -76,12 +76,13 @@ export default function Question({category, question, answers, socket, user, pla
       socket.emit('stop-timer')
       socket.emit('answer-question', ans)
       setAnswer(ans)
+      _setAble(false)
     }
 
   }
   useEffect(() => {
     if (clicks === 5 && able) {
-      setAble(false)
+      _setAble(false)
       console.log('sending buzz timer')
       setTimeout(() => {socket.emit('buzz'); socket.emit('start-timer', 10)}, 1000)
     }
@@ -103,10 +104,13 @@ export default function Question({category, question, answers, socket, user, pla
       setTime(val)
     })
     socket.on('timer-done', () => {
-      if (leader && able) socket.emit('answer-question', null)
+      console.log('timer done')
+      if (leader && able) {
+        console.log(leader)
+        socket.emit('answer-question', null)
+      }
     })
     return () => {
-      console.log('cleanup')
       document.removeEventListener("keydown", handleKeydown)
       setAnswer()
       setCorrectAnswer()
