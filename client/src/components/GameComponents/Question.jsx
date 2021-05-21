@@ -14,13 +14,24 @@ export default function Question({category, question, answers, socket, user, pla
   const [answer, setAnswer] = useState()
   const [correctAnswer, setCorrectAnswer] = useState()
   const [time, setTime] = useState(5)
+  const [timerDone, setTimerDone] = useState(false)
+  const timerDoneRef = useRef(timerDone)
   const _setAble = data => {
     ableRef.current = data;
     setAble(data)
   }
+  const _setTimerDone = data => {
+    timerDoneRef.current = data
+    setTimerDone(data)
+  }
+  // const _setDisableAnswerSend = data => {
+  //   disableAnswerSendRef.current = data;
+  //   setDisableAnswerSend(data)
+  // }
+
   const handleKeydown = (e) => {
     if (e.keyCode) {
-      if (e.keyCode === 70) {
+      if (e.keyCode === 70 && !timerDoneRef.current) {
         setClicks(prev => {
           if (prev === 5) return 5
           else if (ableRef.current) return prev + 1
@@ -83,8 +94,12 @@ export default function Question({category, question, answers, socket, user, pla
   useEffect(() => {
     if (clicks === 5 && able) {
       _setAble(false)
-      console.log('sending buzz timer')
-      setTimeout(() => {socket.emit('buzz'); socket.emit('start-timer', 10)}, 1000)
+      socket.emit('stop-timer')
+      setTimeout(() => {
+        socket.emit('buzz'); 
+        socket.emit('start-timer', 10)
+
+      }, 1000)
     }
   }, [clicks, able, socket])
 
@@ -104,9 +119,10 @@ export default function Question({category, question, answers, socket, user, pla
       setTime(val)
     })
     socket.on('timer-done', () => {
-      console.log('timer done')
+      _setTimerDone(true)
       if (leader && able) {
         console.log(leader)
+        socket.emit('stop-timer')
         socket.emit('answer-question', null)
       }
     })
@@ -117,6 +133,11 @@ export default function Question({category, question, answers, socket, user, pla
       setAnsweringQuestion()
       setClicks(0)
       setAble(true)
+      _setTimerDone(false)
+      socket.off('timer')
+      socket.off('timer-done')
+      socket.off('answer')
+      socket.off('answer-questions')
     }
     
     //eslint-disable-next-line
@@ -132,12 +153,12 @@ export default function Question({category, question, answers, socket, user, pla
         {answeringQuestion ? <h1 className="text-gray-100 font-bold text-4xl">{answeringQuestion} is answering...</h1> :
         <>
         <motion.h1 initial={{opacity: 0}} animate={{opacity: 1}} className="text-gray-100 font-bold text-4xl mx-4" dangerouslySetInnerHTML={{__html: `Category: ${category}`}}></motion.h1> 
-        <div className="absolute sm:relative sm:top-10 bottom-20 w-4 mx-auto sm:flex sm:justify-center right-36 sm:right-auto">
+        <motion.div animate={timerDone && {opacity: 0}} transition={{duration: 0.1}} initial={{opacity: 1}} className="absolute bottom-20 sm:relative sm:top-10 w-4 mx-auto sm:flex sm:justify-center right-36 sm:right-auto">
           <div className="flex flex-row">
             <motion.h2 animate={{scale: [1,Math.sin(clicks)/10+.5,1]}} transition={{duration: 0.25}} className="text-gray-100 font-bold text-xl bg-black px-4 py-2 rounded-lg flex-1" style={{filter: "drop-shadow(5px 5px 4px #0a0a0a"}}><BrowserView>f</BrowserView><MobileView>tap</MobileView></motion.h2>
             <h2 className="text-gray-100 font-semibold text-2xl mt-1 ml-5 flex-1">{clicks}/5</h2>
           </div>
-        </div>
+        </motion.div>
         </>}
         </>
         : 

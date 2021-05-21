@@ -68,7 +68,7 @@ app.get('/api/userinfo', (req,res) => {
         if (user) {
           const userData = {username: user.username, email: user.email, id: user.id, elo: user.elo, gamesPlayed: user.gamesPlayed, wins: user.wins}
           const token = jwt.sign(userData, process.env.JWTSECRET, {
-            expiresIn: 300, //5 mins
+            expiresIn: 600, //5 mins
           })
           res.json({error: false, newToken: token, user: userData}) //change
         }
@@ -95,7 +95,7 @@ app.post('/api/signup', (req, res) => {
                 newUser.save().then(newUser => {
                   const userData = {username: newUser.username, email: newUser.email, id: newUser.id, elo: newUser.elo, gamesPlayed: newUser.gamesPlayed, wins: newUser.wins}
                   const token = jwt.sign(userData, process.env.JWTSECRET, {
-                    expiresIn: 300, //5 mins
+                    expiresIn: 600, //5 mins
                   })
                   res.json({error: false, auth: true, token})
                 })
@@ -122,7 +122,7 @@ app.post('/api/login', (req,res) => {
           if (resp) {
             const userData = {username: user.username, email: user.email, id: user.id, elo: user.elo, gamesPlayed: user.gamesPlayed, wins: user.wins}
             const token = jwt.sign(userData, process.env.JWTSECRET, {
-              expiresIn: 300, //5 mins
+              expiresIn: 600, //5 mins
             })
             res.json({error: false, auth: true, token}) //change
           } else {
@@ -217,6 +217,7 @@ io.on('connection', (socket) => {
     const igindex = igplayers.findIndex(v => v.id === userData.id)
     const room = igplayers[igindex].room
     const roomindex = igrooms.findIndex(v => v.room === room)
+    console.log('START TIMER')
     if (igrooms[roomindex]) {
       clearInterval(igrooms[roomindex].roomtimer)
       igrooms[roomindex].timer = num
@@ -224,10 +225,10 @@ io.on('connection', (socket) => {
         if (igrooms[roomindex]) {
           
           io.to(room).emit('timer', igrooms[roomindex].timer)
-          console.log(igrooms[roomindex].timer)
           if (igrooms[roomindex].timer === 0) {
-            io.to(room).emit('timer-done')
             clearInterval(igrooms[roomindex].roomtimer)
+            console.log('emitting timer done')
+            io.to(room).emit('timer-done')
           }
           igrooms[roomindex].timer --
         }
@@ -265,10 +266,10 @@ io.on('connection', (socket) => {
   })
 
   socket.on('answer-question', (answer) => {
-    console.log('answer-called')
     const igindex = igplayers.findIndex(v => v.id === userData.id)
     const room = igplayers[igindex].room
     const roomindex = igrooms.findIndex(v => v.room === room)
+    console.log('index ++ing')
     if (!igrooms[roomindex]) return null
     if (answer) {
       if (answer === correctanswer) {
@@ -334,7 +335,6 @@ io.on('connection', (socket) => {
       } 
       socket.emit('answer', correctanswer)
     } else {
-      console.log('no answer')
       igrooms[roomindex].index ++
       if (igrooms[roomindex].index < 10) {
         const igfilter = igplayers.filter(p => p.room === room)

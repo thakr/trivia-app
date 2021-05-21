@@ -32,7 +32,7 @@ export default function Game({location}) {
         setQuestionIndex(index)
         setView(<p>Loading</p>)
         setView(<Question category={category} question={null} answers={null} socket={socket} user={location.user} players={playersRef.current} leader={location.leader}/>)
-        
+        console.log('START IN TIMER')
         if (location.leader) {socket.emit('start-timer', 5)}
       }, 3000)
       
