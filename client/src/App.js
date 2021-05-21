@@ -4,6 +4,7 @@ import FindMatch from './components/Routes/FindMatch'
 import Game from './components/Routes/Game'
 import Login from './components/Routes/Login'
 import Dashboard from './components/Routes/Dashboard'
+import NotFound from './components/Routes/NotFound'
 import {BrowserRouter as Router, Switch, Route} from "react-router-dom"
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
         <Route path="/login" exact><Login defaultView="login" /></Route>
         <Route path="/signup" exact><Login defaultView="sign up" /></Route>
         <Route path="/dashboard" exact component={Dashboard}></Route>
+        <Route path="/" component={NotFound}></Route>
       </Switch>
     </Router> 
   );

@@ -9,7 +9,7 @@ const axios = require('axios')
 export default function Dashboard() {
   const history = useHistory()
   useEffect(() => {
-    axios.get(process.env.NODE_ENV === 'development' ? `http://localhost:8080/api/userinfo?token=${localStorage.getItem('token')}` : `/userinfo?token=${localStorage.getItem('token')}`)
+    axios.get(process.env.NODE_ENV === 'development' ? `http://localhost:8080/api/userinfo?token=${localStorage.getItem('token')}` : `/api/userinfo?token=${localStorage.getItem('token')}`)
     .then(res => {
       if (res.data.error && res.data.msg) history.push({pathname: '/login', defaultMsg: res.data.msg})
       setUser(res.data.user)

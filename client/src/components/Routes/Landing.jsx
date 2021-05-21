@@ -18,9 +18,9 @@ export default function Landing() {
             localStorage.getItem("token") ? history.push('/dashboard') : history.push('/signup')
           }} />
         </div>
-      </motion.div>
-      <motion.p className="mt-10 text-center mx-4 text-gray-700" initial={{opacity: 0}} animate={{opacity: 1}} transition={{duration:0.5}}>triviahit is an online multiplayer trivia game where players answer a series of 10 questions and compete to get the best score and raise in rank.</motion.p>
-      <motion.p className="mt-5 text-center mx-4 text-gray-700" initial={{opacity: 0}} animate={{opacity: 1}} transition={{duration:0.5}}>This is an open source project created by Shaan Thakker. View the source code on <a className="underline" target="_blank" rel="noreferrer" href='https://github.com/demolite-stm/trivia-app'>GitHub</a>.</motion.p>
+        </motion.div>
+        <motion.p className="mt-10 text-center mx-4 text-gray-700" initial={{opacity: 0}} animate={{opacity: 1}} transition={{duration:0.5}}>triviahit is an online multiplayer trivia game where players answer a series of 10 questions and compete to get the best score and raise in rank.</motion.p>
+        <motion.p className="mt-5 text-center mx-4 text-gray-700" initial={{opacity: 0}} animate={{opacity: 1}} transition={{duration:0.5}}>This is an open source project created by Shaan Thakker. View the source code on <a className="underline" target="_blank" rel="noreferrer" href='https://github.com/demolite-stm/trivia-app'>GitHub</a>.</motion.p>
       </motion.div>
   )
 }

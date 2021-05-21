@@ -1,7 +1,6 @@
 import React from 'react'
 import {motion} from 'framer-motion'
 import {useHistory} from 'react-router-dom'
-import FilledButton from '../FilledButton'
 import InfoCard from '../DashboardComponents/InfoCard'
 
 export default function Home({user}) {
