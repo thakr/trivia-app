@@ -68,7 +68,7 @@ app.get('/api/userinfo', (req,res) => {
         if (user) {
           const userData = {username: user.username, email: user.email, id: user.id, elo: user.elo, gamesPlayed: user.gamesPlayed, wins: user.wins}
           const token = jwt.sign(userData, process.env.JWTSECRET, {
-            expiresIn: 600, //5 mins
+            expiresIn: 600, //10 mins
           })
           res.json({error: false, newToken: token, user: userData}) //change
         }
@@ -95,7 +95,7 @@ app.post('/api/signup', (req, res) => {
                 newUser.save().then(newUser => {
                   const userData = {username: newUser.username, email: newUser.email, id: newUser.id, elo: newUser.elo, gamesPlayed: newUser.gamesPlayed, wins: newUser.wins}
                   const token = jwt.sign(userData, process.env.JWTSECRET, {
-                    expiresIn: 600, //5 mins
+                    expiresIn: 600, //10 mins
                   })
                   res.json({error: false, auth: true, token})
                 })
@@ -122,7 +122,7 @@ app.post('/api/login', (req,res) => {
           if (resp) {
             const userData = {username: user.username, email: user.email, id: user.id, elo: user.elo, gamesPlayed: user.gamesPlayed, wins: user.wins}
             const token = jwt.sign(userData, process.env.JWTSECRET, {
-              expiresIn: 600, //5 mins
+              expiresIn: 600, //10 mins
             })
             res.json({error: false, auth: true, token}) //change
           } else {
