@@ -11,11 +11,16 @@ export default function Question({category, question, answers, socket, user, pla
   const [able, setAble] = useState(true)
   const ableRef = useRef(able)
   const [answeringQuestion, setAnsweringQuestion] = useState()
+  const answeringQuestionRef = useRef(answeringQuestion)
   const [answer, setAnswer] = useState()
   const [correctAnswer, setCorrectAnswer] = useState()
   const [time, setTime] = useState(5)
   const [timerDone, setTimerDone] = useState(false)
   const timerDoneRef = useRef(timerDone)
+  const _setAnsweringQuestion = data => {
+    answeringQuestionRef.current = data
+    setAnsweringQuestion(data)
+  }
   const _setAble = data => {
     ableRef.current = data;
     setAble(data)
@@ -24,10 +29,6 @@ export default function Question({category, question, answers, socket, user, pla
     timerDoneRef.current = data
     setTimerDone(data)
   }
-  // const _setDisableAnswerSend = data => {
-  //   disableAnswerSendRef.current = data;
-  //   setDisableAnswerSend(data)
-  // }
 
   const handleKeydown = (e) => {
     if (e.keyCode) {
@@ -98,7 +99,6 @@ export default function Question({category, question, answers, socket, user, pla
       setTimeout(() => {
         socket.emit('buzz'); 
         socket.emit('start-timer', 10)
-
       }, 1000)
     }
   }, [clicks, able, socket])
@@ -109,8 +109,8 @@ export default function Question({category, question, answers, socket, user, pla
     socket.on('answer-question', fuser => {
       if (user.id !== fuser.id) {
         _setAble(false)
-        setAnsweringQuestion(fuser.username)
       }
+      _setAnsweringQuestion(fuser)
     })
     socket.on('answer', correct => {
       setCorrectAnswer(correct)
@@ -120,37 +120,43 @@ export default function Question({category, question, answers, socket, user, pla
     })
     socket.on('timer-done', () => {
       _setTimerDone(true)
-      if (leader && able) {
-        console.log(leader)
+      if (ableRef.current && leader) {
         socket.emit('stop-timer')
         socket.emit('answer-question', null)
       }
+      if (answeringQuestionRef.current) {
+        if (answeringQuestionRef.current.id === user.id) {
+          socket.emit('stop-timer')
+          socket.emit('no-answer-timer')
+        }
+      }
+     
     })
     return () => {
       document.removeEventListener("keydown", handleKeydown)
       setAnswer()
       setCorrectAnswer()
+      _setAnsweringQuestion()
       setAnsweringQuestion()
       setClicks(0)
-      setAble(true)
+      _setAble(true)
       _setTimerDone(false)
       socket.off('timer')
       socket.off('timer-done')
       socket.off('answer')
-      socket.off('answer-questions')
     }
     
     //eslint-disable-next-line
   }, [])
 
-  
+
   return (
     <>
       <div className="flex flex-col items-center justify-center bg-gray-900 min-h-screen text-center">
        <Timer time={time}/>
         {question === null ?
         <> 
-        {answeringQuestion ? <h1 className="text-gray-100 font-bold text-4xl">{answeringQuestion} is answering...</h1> :
+        {answeringQuestion ? <h1 className="text-gray-100 font-bold text-4xl">{answeringQuestion.username} is answering...</h1> :
         <>
         <motion.h1 initial={{opacity: 0}} animate={{opacity: 1}} className="text-gray-100 font-bold text-4xl mx-4" dangerouslySetInnerHTML={{__html: `Category: ${category}`}}></motion.h1> 
         <motion.div animate={timerDone && {opacity: 0}} transition={{duration: 0.1}} initial={{opacity: 1}} className="absolute bottom-20 sm:relative sm:top-10 w-4 mx-auto sm:flex sm:justify-center right-36 sm:right-auto">

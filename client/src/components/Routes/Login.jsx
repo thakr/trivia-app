@@ -85,7 +85,7 @@ export default function Login({defaultView}) {
         <p className="mt-2 text-gray-500 text-md">Have an account?</p> <p className="cursor-pointer text-gray-600 text-lg hover:text-gray-800 transition-colors ease-in-out duration-200 mb-5" onClick={() => {history.push('/login'); setView('login')}}>log in</p>   
       </>}
       <div className="w-full text-center">
-        <a className="text-gray-600 hover:text-gray-800 transition-colors ease-in-out duration-200 text-xl" href="/">🡠 home</a>
+        <a className="text-gray-600 hover:text-gray-800 transition-colors ease-in-out duration-200 text-xl" href="/">home</a>
       </div>
       </div>
     </div>

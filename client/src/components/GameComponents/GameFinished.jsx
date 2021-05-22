@@ -28,7 +28,7 @@ export default function GameFinished({players, user}) {
       <h1 className="text-red-500 font-bold text-8xl sm:text-6xl">You lost.</h1>
       <p className="text-xl mt-4 text-red-600">elo: {players[players.findIndex(v => v.id === user.id)].elo} <span className={`${players[players.findIndex(v => v.id === user.id)].elo - user.elo < 0 ? "text-red-500" : "text-green-500"}`}>({players[players.findIndex(v => v.id === user.id)].elo - user.elo})</span></p>
     </>}
-    <a className="mt-2 text-gray-300 hover:text-gray-100 transition-colors ease-in-out duration-200" href="/dashboard">🡠 Dashboard</a>
+    <a className="mt-2 text-gray-300 hover:text-gray-100 transition-colors ease-in-out duration-200 font-medium" href="/dashboard">dashboard</a>
     </div>
   )
 }

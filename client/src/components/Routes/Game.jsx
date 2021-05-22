@@ -38,8 +38,8 @@ export default function Game({location}) {
       
     })
     socket.on('answer-question', ({id, question, answers}) => {
-      console.log('ans wqq')
       if (id === location.user.id) {
+        console.log('answering quaaastt')
         setView(<Question category={question.category} question={question} answers={answers} socket={socket} user={location.user} players={playersRef.current} leader={location.leader}/>)
       }
     })
