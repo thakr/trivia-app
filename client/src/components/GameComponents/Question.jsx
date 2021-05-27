@@ -7,7 +7,6 @@ import {BrowserView, MobileView} from 'react-device-detect';
 
 export default function Question({category, question, answers, socket, user, players, leader}) {
   const [clicks, setClicks] = useState(0)
-
   const [able, setAble] = useState(true)
   const ableRef = useRef(able)
   const [answeringQuestion, setAnsweringQuestion] = useState()
@@ -17,6 +16,12 @@ export default function Question({category, question, answers, socket, user, pla
   const [time, setTime] = useState(5)
   const [timerDone, setTimerDone] = useState(false)
   const timerDoneRef = useRef(timerDone)
+  const [ableTabChange, setAbleTabChange] = useState(true)
+  const ableTabChangeRef = useRef(ableTabChange)
+  const _setAbleTabChange = data => {
+    ableTabChangeRef.current = data
+    setAbleTabChange(data)
+  }
   const _setAnsweringQuestion = data => {
     answeringQuestionRef.current = data
     setAnsweringQuestion(data)
@@ -92,6 +97,16 @@ export default function Question({category, question, answers, socket, user, pla
     }
 
   }
+  const handleTabChange = () => {
+    if (answeringQuestionRef.current && ableTabChangeRef.current) {
+      if (answeringQuestionRef.current.id === user.id) {
+        console.log('tab change')
+        socket.emit('stop-timer')
+        socket.emit('no-answer-timer')
+        _setAbleTabChange(false)
+      }
+    }
+  }
   useEffect(() => {
     if (clicks === 5 && able) {
       _setAble(false)
@@ -104,6 +119,7 @@ export default function Question({category, question, answers, socket, user, pla
   }, [clicks, able, socket])
 
   useEffect(() => {
+    document.addEventListener("visibilitychange", handleTabChange)
     document.addEventListener("keydown", handleKeydown)
     document.addEventListener("touchstart", handleKeydown)
     socket.on('answer-question', fuser => {
@@ -121,12 +137,10 @@ export default function Question({category, question, answers, socket, user, pla
     socket.on('timer-done', () => {
       _setTimerDone(true)
       if (ableRef.current && leader) {
-        socket.emit('stop-timer')
         socket.emit('answer-question', null)
       }
       if (answeringQuestionRef.current) {
         if (answeringQuestionRef.current.id === user.id) {
-          socket.emit('stop-timer')
           socket.emit('no-answer-timer')
         }
       }
@@ -134,6 +148,7 @@ export default function Question({category, question, answers, socket, user, pla
     })
     return () => {
       document.removeEventListener("keydown", handleKeydown)
+      document.removeEventListener("visibilitychange", handleTabChange)
       setAnswer()
       setCorrectAnswer()
       _setAnsweringQuestion()
@@ -141,6 +156,7 @@ export default function Question({category, question, answers, socket, user, pla
       setClicks(0)
       _setAble(true)
       _setTimerDone(false)
+      _setAbleTabChange(true)
       socket.off('timer')
       socket.off('timer-done')
       socket.off('answer')
@@ -170,7 +186,7 @@ export default function Question({category, question, answers, socket, user, pla
         : 
         <div>
           <motion.h1 initial={{opacity: 0}} animate={{opacity: 1}} className="text-gray-100 font-bold text-4xl sm:text-2xl mx-10 mt-5 overflow-wrap" dangerouslySetInnerHTML={{__html: question}}></motion.h1>
-          <motion.div variants={Parent} initial="init" animate="load" className="mt-36 sm:mt-16 grid grid-cols-2 sm:grid-cols-1 min-h-64 max-h-64 mb-2 sm:overflow-auto">
+          <motion.div variants={Parent} initial="init" animate="load" className="mt-36 sm:mt-16 grid grid-cols-2 sm:grid-cols-1 h-64 mb-2 sm:overflow-auto">
             <AnimatePresence>
               {answers.map((v,i) => {
                 return <motion.button key={v} onClick={() => handleClick(v)} variants={Main} animate={correctAnswer && correctAnswer === v ? "correct" : answer === v ? "incorrect" : {backgroundColor: "rgb(55,65,81)"}} className="bg-gray-700 m-5 px-24 h-16 rounded-lg text-gray-100 font-medium min-h-0 min-w-0 focus:outline-none" dangerouslySetInnerHTML={{__html: v}}></motion.button>

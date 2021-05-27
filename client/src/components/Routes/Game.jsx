@@ -13,7 +13,9 @@ export default function Game({location}) {
       window.open('/', '_self')
     }
     socket.on('game-cancelled', () => {
-      window.open('/', '_self')
+      setViewCounter(false)
+      setView(<p>Your opponent has left the match. The match has now been cancelled. Redirecting...</p>)
+      setTimeout(() => window.open('/', '_self'), 1000)
     })
     if (location.leader) {
       socket.emit('start-game')
@@ -22,7 +24,7 @@ export default function Game({location}) {
       _setPlayers(players)
       if (location.leader && first) {
         const elorating = Math.log(location.user.elo)
-        const difficulty = elorating > 7 ? "hard" : elorating > 4 ? "medium" : "easy"
+        const difficulty = elorating > 4.3 ? "hard" : elorating > 3.5 ? "medium" : "easy"
         console.log('getting questions')
         socket.emit('get-questions', difficulty)
       }
@@ -32,8 +34,11 @@ export default function Game({location}) {
         setQuestionIndex(index)
         setView(<p>Loading</p>)
         setView(<Question category={category} question={null} answers={null} socket={socket} user={location.user} players={playersRef.current} leader={location.leader}/>)
-        console.log('START IN TIMER')
-        if (location.leader) {socket.emit('start-timer', 5)}
+        
+        if (location.leader) {
+          console.log('START IN TIMER')
+          socket.emit('start-timer', 5)
+        }
       }, 3000)
       
     })
@@ -49,6 +54,13 @@ export default function Game({location}) {
         setViewCounter(false)
       }, 3000)
     })
+    return () => {
+      socket.off('players')
+      socket.off('category')
+      socket.off('answer-question')
+      socket.off('game-cancelled')
+      socket.off('game-finished')
+    }
     //eslint-disable-next-line
   }, [])
 
@@ -65,7 +77,7 @@ export default function Game({location}) {
 
   return (
     <>
-      {viewCounter &&<Counter amount={questionIndex}/>}
+      {viewCounter &&<Counter amount={questionIndex + 1}/>}
       
       {view === "init" ?
       <div className="flex flex-col items-center justify-center bg-gray-900 min-h-screen">

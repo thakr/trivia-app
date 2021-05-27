@@ -53,6 +53,10 @@ export default function FindMatch() {
       history.push({pathname: '/login', defaultMsg: "an error occured"})
     })
     return () => {
+      socket.off('game-cancelled')
+      socket.off('expired-token')
+      socket.off('no-token')
+      socket.off('error')
       if (cleanup) socket.disconnect() 
     } //eslint-disable-next-line
   }, [])
