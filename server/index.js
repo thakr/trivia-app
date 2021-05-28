@@ -173,7 +173,7 @@ io.on('connection', (socket) => {
                   igplayers.push({id: similarEloArr[i+1].id, room: room, username: similarEloArr[i+1].username, elo: similarEloArr[i+1].elo, points: 0})
                   matchmakers.splice(matchmakers.indexOf(m => similarEloArr[i].id === m.id),1)
                   matchmakers.splice(matchmakers.indexOf(m => similarEloArr[i+1].id === m.id),1)
-                  igrooms.push({room, questions: [], index: 0})
+                  igrooms.push({room, questions: [], index: 0, loadedPlayers: []})
                 }
               }    
             }
@@ -182,6 +182,7 @@ io.on('connection', (socket) => {
       })
     })
   })
+
   socket.on('start-game', () => {
     let igindex = -1;
     igplayers.map((v,i) => {
@@ -191,7 +192,12 @@ io.on('connection', (socket) => {
       const room = igplayers[igindex].room
       const roomindex = igrooms.findIndex(v => v.room === room)
       const igfilter = igplayers.filter(p => p.room === room)
-      io.to(room).emit('players', {players: igfilter, first: true})
+      if (igrooms[roomindex].loadedPlayers.indexOf(v => v.id === userData.id) === -1) igrooms[roomindex].loadedPlayers.push(userData.id)
+      if (igrooms[roomindex].loadedPlayers.length >= 2) {
+        console.log('starting the game')
+        io.to(room).emit('players', {players: igfilter, first: true})
+      }
+      
     }   
   })
 
@@ -207,10 +213,11 @@ io.on('connection', (socket) => {
     if (!igrooms[roomindex]) return null
     axios.get(`https://opentdb.com/api.php?amount=10&difficulty=${difficulty}`)
     .then(res => {
-      igrooms[roomindex].questions = res.data.results
+      if (igrooms[roomindex]) igrooms[roomindex].questions = res.data.results
       setTimeout(() => {
-        if (!igrooms[roomindex]) return null
-        io.to(room).emit('category', {category: igrooms[roomindex].questions[0].category, index: 0})
+        if (igrooms[roomindex]) {
+          io.to(room).emit('category', {category: igrooms[roomindex].questions[0].category, index: 0})
+        }
       }, 5000)
     })
   })

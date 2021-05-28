@@ -15,11 +15,9 @@ export default function Game({location}) {
     socket.on('game-cancelled', () => {
       setViewCounter(false)
       setView(<p>Your opponent has left the match. The match has now been cancelled. Redirecting...</p>)
-      setTimeout(() => window.open('/', '_self'), 1000)
+      setTimeout(() => window.open('/', '_self'), 2000)
     })
-    if (location.leader) {
-      socket.emit('start-game')
-    }
+    socket.emit('start-game')
     socket.on('players', ({players, first}) => {
       _setPlayers(players)
       if (location.leader && first) {
