@@ -31,7 +31,7 @@ export default function Game({location}) {
       setTimeout(() => {
         setQuestionIndex(index)
         setView(<p>Loading</p>)
-        setView(<Question category={category} question={null} answers={null} socket={socket} user={location.user} players={playersRef.current} leader={location.leader}/>)
+        setView(<Question category={category} question={null} answers={null} socket={socket} user={location.user} players={playersRef.current} leader={location.leader} answering={null}/>)
         
         if (location.leader) {
           console.log('START IN TIMER')
@@ -43,8 +43,8 @@ export default function Game({location}) {
     socket.on('answer-question', ({id, question, answers}) => {
       if (id === location.user.id) {
         console.log('answering quaaastt')
-        setView(<Question category={question.category} question={question} answers={answers} socket={socket} user={location.user} players={playersRef.current} leader={location.leader}/>)
-      }
+        setView(<Question category={question.category} question={question} answers={answers} socket={socket} user={location.user} players={playersRef.current} leader={location.leader} answering={true}/>)
+      } else setView(<Question category={question.category} question={question} answers={answers} socket={socket} user={location.user} players={playersRef.current} leader={location.leader} answering={null}/>)
     })
     socket.on('game-finished', () => {
       setTimeout(() => {

@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import {BrowserView, MobileView} from 'react-device-detect';
 
 
-export default function Question({category, question, answers, socket, user, players, leader}) {
+export default function Question({category, question, answers, socket, user, players, leader, answering}) {
   const [clicks, setClicks] = useState(0)
   const [able, setAble] = useState(true)
   const ableRef = useRef(able)
@@ -92,7 +92,6 @@ export default function Question({category, question, answers, socket, user, pla
     if (!answer) {
       socket.emit('stop-timer')
       socket.emit('answer-question', ans)
-      setAnswer(ans)
       _setAble(false)
     }
 
@@ -144,7 +143,9 @@ export default function Question({category, question, answers, socket, user, pla
           socket.emit('no-answer-timer')
         }
       }
-     
+    })
+    socket.on('user_answered', (answer) => {
+      setAnswer(answer)
     })
     return () => {
       document.removeEventListener("keydown", handleKeydown)
@@ -170,9 +171,19 @@ export default function Question({category, question, answers, socket, user, pla
     <>
       <div className="flex flex-col items-center justify-center bg-gray-900 min-h-screen text-center">
        <Timer time={time}/>
-        {question === null ?
+        {answering === null ?
         <> 
-        {answeringQuestion ? <h1 className="text-gray-100 font-bold text-4xl">{answeringQuestion.username} is answering...</h1> :
+        {answeringQuestion ? <div>
+          <motion.h1 initial={{opacity: 0}} animate={{opacity: 1}} className="text-gray-500 font-bold text-4xl">{answeringQuestion.username} is answering...</motion.h1>
+          <motion.h1 initial={{opacity: 0}} animate={{opacity: 1}} className="text-gray-100 font-bold text-4xl sm:text-2xl mx-10 mt-5 overflow-wrap" dangerouslySetInnerHTML={{__html: question}}></motion.h1>
+          <motion.div variants={Parent} initial="init" animate="load" className="mt-36 sm:mt-16 grid grid-cols-2 sm:grid-cols-1 h-64 mb-2 sm:overflow-auto">
+            <AnimatePresence>
+              {answers.map((v,i) => {
+                return <motion.button key={v} variants={Main} animate={correctAnswer && correctAnswer === v ? "correct" : answer === v ? "incorrect" : {backgroundColor: "rgb(75,85,99)"}} className="bg-gray-600 m-5 px-24 h-16 rounded-lg text-gray-100 font-medium min-h-0 min-w-0 focus:outline-none" dangerouslySetInnerHTML={{__html: v}}></motion.button>
+              })}
+            </AnimatePresence>
+          </motion.div>
+        </div> :
         <>
         <motion.h1 initial={{opacity: 0}} animate={{opacity: 1}} className="text-gray-100 font-bold text-4xl mx-4" dangerouslySetInnerHTML={{__html: `Category: ${category}`}}></motion.h1> 
         <motion.div animate={timerDone && {opacity: 0}} transition={{duration: 0.1}} initial={{opacity: 1}} className="absolute bottom-20 sm:relative sm:top-10 w-4 mx-auto sm:flex sm:justify-center right-36 sm:right-auto">
