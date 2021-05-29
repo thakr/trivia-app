@@ -30,6 +30,7 @@ mongoose.connect(process.env.MONGOURI, { useUnifiedTopology: true, useNewUrlPars
 const matchmakers = []
 const igplayers = []
 const igrooms = []
+const custommatchmakers = [] //{room: "awefawelfjalwe", users: ["3234jlwfawe", "35hq4696932qah"]}
 
 const saveElo = (user1, user2, winner) => {
   User.findById(user1.id).then(user => {
@@ -173,7 +174,7 @@ io.on('connection', (socket) => {
                   igplayers.push({id: similarEloArr[i+1].id, room: room, username: similarEloArr[i+1].username, elo: similarEloArr[i+1].elo, points: 0})
                   matchmakers.splice(matchmakers.indexOf(m => similarEloArr[i].id === m.id),1)
                   matchmakers.splice(matchmakers.indexOf(m => similarEloArr[i+1].id === m.id),1)
-                  igrooms.push({room, questions: [], index: 0, loadedPlayers: []})
+                  igrooms.push({room, questions: [], index: 0, loadedPlayers: [], ranked:true})
                 }
               }    
             }
@@ -182,7 +183,46 @@ io.on('connection', (socket) => {
       })
     })
   })
-
+  socket.on('custom-matchmake', ({token,roomid}) => {
+    jwt.verify(token, process.env.JWTSECRET, (err, decoded) => {
+      if (err) {
+        if (err instanceof jwt.TokenExpiredError) {
+          return socket.emit("expired-token")
+        } else {
+          if (err instanceof jwt.JsonWebTokenError) {
+            return socket.emit("no-token")
+          } else {
+            return socket.emit("error")
+          }
+        }
+      }
+      userData = decoded
+      userData.socket = socket
+      User.findById(userData.id).then(user => {
+        userData.elo = user.elo
+      }).then(() => {
+        socket.emit('user-from-token', {username: userData.username, id: userData.id, elo: userData.elo})
+        if (roomid) {
+          const cmmfilter = custommatchmakers.filter(v => v.room === roomid)
+          if (cmmfilter.length > 0) {
+            socket.join(roomid)
+            cmmfilter[0].users[0].socket.emit('game-starting', true)
+            socket.emit('game-starting', false)
+            igplayers.push({id: cmmfilter[0].users[0].id, room: roomid, username: cmmfilter[0].users[0].username, elo: cmmfilter[0].users[0].elo, points: 0})
+            igplayers.push({id: userData.id, room: roomid, username: userData.username, elo: userData.elo, points: 0})
+            custommatchmakers.splice(custommatchmakers.indexOf(v => v.room === roomid),1)
+            igrooms.push({room:roomid, questions: [], index: 0, loadedPlayers: [], ranked:false})
+          } else {
+            socket.emit('no-room-found')
+          }
+        } else {
+          custommatchmakers.push({room: socket.id, users: [userData]})
+          socket.emit('custom-room-id', socket.id)
+          socket.join(socket.id)
+        }
+      })
+    })
+  })
   socket.on('start-game', () => {
     let igindex = -1;
     igplayers.map((v,i) => {
@@ -194,7 +234,6 @@ io.on('connection', (socket) => {
       const igfilter = igplayers.filter(p => p.room === room)
       if (igrooms[roomindex].loadedPlayers.indexOf(v => v.id === userData.id) === -1) igrooms[roomindex].loadedPlayers.push(userData.id)
       if (igrooms[roomindex].loadedPlayers.length >= 2) {
-        console.log('starting the game')
         io.to(room).emit('players', {players: igfilter, first: true})
       }
       
@@ -203,7 +242,6 @@ io.on('connection', (socket) => {
 
 
   socket.on('get-questions', (difficulty) => {
-    
     let igindex = -1;
     igplayers.map((v,i) => {
       if (v.id === userData.id) igindex = i
@@ -278,15 +316,15 @@ io.on('connection', (socket) => {
       if (igfilter[0].points > igfilter[1].points) {
         igfilter[0].elo = igfilter[0].elo + 5
         igfilter[1].elo = igfilter[1].elo - 3
-        saveElo(igfilter[0], igfilter[1], igfilter[0])
+        if (igrooms[roomindex].ranked) saveElo(igfilter[0], igfilter[1], igfilter[0])
       }
       if (igfilter[0].points < igfilter[1].points) {
         igfilter[1].elo = igfilter[1].elo + 5
         igfilter[0].elo = igfilter[0].elo - 3
-        saveElo(igfilter[0], igfilter[1], igfilter[1])
+        if (igrooms[roomindex].ranked) saveElo(igfilter[0], igfilter[1], igfilter[1])
       }
       if (igfilter[0].points === igfilter[1].points) {
-        saveElo(igfilter[0], igfilter[1], "tie")
+        if (igrooms[roomindex].ranked) saveElo(igfilter[0], igfilter[1], "tie")
       }
       io.to(room).emit('players', {players: igfilter, first: false})
       clearInterval(igrooms[roomindex].roomtimer)
@@ -356,15 +394,15 @@ io.on('connection', (socket) => {
       if (igfilter[0].points > igfilter[1].points) {
         igfilter[0].elo = igfilter[0].elo + 5
         igfilter[1].elo = igfilter[1].elo - 3
-        saveElo(igfilter[0], igfilter[1], igfilter[0])
+        if (igrooms[roomindex].ranked) saveElo(igfilter[0], igfilter[1], igfilter[0])
       }
       if (igfilter[0].points < igfilter[1].points) {
         igfilter[1].elo = igfilter[1].elo + 5
         igfilter[0].elo = igfilter[0].elo - 3
-        saveElo(igfilter[0], igfilter[1], igfilter[1])
+        if (igrooms[roomindex].ranked) saveElo(igfilter[0], igfilter[1], igfilter[1])
       }
       if (igfilter[0].points === igfilter[1].points) {
-        saveElo(igfilter[0], igfilter[1], "tie")
+        if (igrooms[roomindex].ranked) saveElo(igfilter[0], igfilter[1], "tie")
       }
       io.to(room).emit('players', {players: igfilter, first: false})
       clearInterval(igrooms[roomindex].roomtimer)
@@ -378,6 +416,9 @@ io.on('connection', (socket) => {
     console.log("user disconnected " + socket.id)
     if (userData) {
       if (matchmakers.filter(m => m.id === userData.id).length > 0) matchmakers.splice(matchmakers.findIndex(m => m.id === userData.id), 1)
+      if (custommatchmakers.findIndex(m => m.room === socket.id) !== -1) {
+        custommatchmakers.splice(custommatchmakers.findIndex(m => m.room === socket.id),1)
+      }
       let igindex = -1;
       igplayers.map((v,i) => {
         if (v.id === userData.id) igindex = i
@@ -391,7 +432,6 @@ io.on('connection', (socket) => {
           const igfilter = igplayers.filter(p => p.room === room)
           igfilter.forEach(f => igplayers.splice(igplayers.findIndex(e => e.id === f.id),1))
           igrooms.splice(roomindex,1)
-          console.log(igrooms)
         } else {
           igplayers.splice(igindex,1)
         }

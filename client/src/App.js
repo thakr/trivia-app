@@ -5,6 +5,7 @@ import Game from './components/Routes/Game'
 import Login from './components/Routes/Login'
 import Dashboard from './components/Routes/Dashboard'
 import NotFound from './components/Routes/NotFound'
+import CustomGame from './components/Routes/CustomGame'
 import {BrowserRouter as Router, Switch, Route} from "react-router-dom"
 
 function App() {
@@ -14,6 +15,7 @@ function App() {
       <Switch>
         <Route path="/" exact component={Landing}></Route>
         <Route path="/find-match" exact><FindMatch /></Route>
+        <Route path="/custom-game" exact><CustomGame /></Route>
         <Route path="/game" exact component={Game}></Route>
         <Route path="/login" exact><Login defaultView="login" /></Route>
         <Route path="/signup" exact><Login defaultView="sign up" /></Route>

@@ -48,7 +48,7 @@ export default function Game({location}) {
     })
     socket.on('game-finished', () => {
       setTimeout(() => {
-        setView(<GameFinished players={playersRef.current} user={location.user}/>)
+        setView(<GameFinished players={playersRef.current} user={location.user} ranked={location.ranked}/>)
         setViewCounter(false)
       }, 3000)
     })
