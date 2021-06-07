@@ -34,12 +34,12 @@ export default function VS({players}) {
       <motion.div initial="init" animate="load" variants={Main} className="flex flex-row sm:flex-col items-center">
         <motion.div variants={ChildElems} className="text-center">
           <h1 className="text-gray-100 font-bold text-4xl">{players[0].username}</h1>
-          <h2 className="text-gray-100 font-normal text-2xl">ELO: {Math.floor(players[0].elo)}</h2>
+          <h2 className="text-gray-100 font-normal text-2xl">elo: {Math.floor(players[0].elo)}</h2>
         </motion.div>
         <motion.h1 variants={ChildElems} className="text-gray-100 font-bold text-4xl mx-10 sm:my-10">VS</motion.h1>
         <motion.div variants={ChildElems} className="text-center">
           <h1 className="text-gray-100 font-bold text-4xl">{players[1].username}</h1>
-          <h2 className="text-gray-100 font-normal text-2xl">ELO: {Math.floor(players[1].elo)}</h2>
+          <h2 className="text-gray-100 font-normal text-2xl">elo: {Math.floor(players[1].elo)}</h2>
         </motion.div>
       </motion.div>
     </div>

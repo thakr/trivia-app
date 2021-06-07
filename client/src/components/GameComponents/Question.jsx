@@ -3,7 +3,9 @@ import Timer from './Timer'
 import Scoreboard from './Scoreboard'
 import { motion, AnimatePresence } from "framer-motion"
 import {BrowserView, MobileView} from 'react-device-detect';
-
+import useSound from 'use-sound';
+import CORRECT from "../../sounds/CORRECT.mp3"
+import INCORRECT from "../../sounds/INCORRECT.mp3"
 
 export default function Question({category, question, answers, socket, user, players, leader, answering}) {
   const [clicks, setClicks] = useState(0)
@@ -16,6 +18,8 @@ export default function Question({category, question, answers, socket, user, pla
   const [time, setTime] = useState(5)
   const [timerDone, setTimerDone] = useState(false)
   const timerDoneRef = useRef(timerDone)
+  const [playCorrect] = useSound(CORRECT, {volume:1})
+  const [playIncorrect] = useSound(INCORRECT, {volume:1})
   const [ableTabChange, setAbleTabChange] = useState(true)
   const ableTabChangeRef = useRef(ableTabChange)
   const _setAbleTabChange = data => {
@@ -165,7 +169,12 @@ export default function Question({category, question, answers, socket, user, pla
     
     //eslint-disable-next-line
   }, [])
-
+  useEffect(() => {
+    if (correctAnswer && answer) {
+      correctAnswer === answer ? playCorrect() : playIncorrect()
+    }
+    //eslint-disable-next-line
+  },[correctAnswer,answer])
 
   return (
     <>

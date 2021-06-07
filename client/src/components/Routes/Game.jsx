@@ -23,7 +23,6 @@ export default function Game({location}) {
       if (location.leader && first) {
         const elorating = Math.log(location.user.elo)
         const difficulty = elorating > 4.3 ? "hard" : elorating > 3.5 ? "medium" : "easy"
-        console.log('getting questions')
         socket.emit('get-questions', difficulty)
       }
     })
@@ -34,7 +33,6 @@ export default function Game({location}) {
         setView(<Question category={category} question={null} answers={null} socket={socket} user={location.user} players={playersRef.current} leader={location.leader} answering={null}/>)
         
         if (location.leader) {
-          console.log('START IN TIMER')
           socket.emit('start-timer', 5)
         }
       }, 3000)
@@ -42,7 +40,6 @@ export default function Game({location}) {
     })
     socket.on('answer-question', ({id, question, answers}) => {
       if (id === location.user.id) {
-        console.log('answering quaaastt')
         setView(<Question category={question.category} question={question} answers={answers} socket={socket} user={location.user} players={playersRef.current} leader={location.leader} answering={true}/>)
       } else setView(<Question category={question.category} question={question} answers={answers} socket={socket} user={location.user} players={playersRef.current} leader={location.leader} answering={null}/>)
     })
