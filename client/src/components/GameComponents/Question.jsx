@@ -173,6 +173,9 @@ export default function Question({category, question, answers, socket, user, pla
     if (correctAnswer && answer) {
       correctAnswer === answer ? playCorrect() : playIncorrect()
     }
+    if (correctAnswer && !answer) {
+      playIncorrect()
+    }
     //eslint-disable-next-line
   },[correctAnswer,answer])
 
