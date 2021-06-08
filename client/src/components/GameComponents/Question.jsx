@@ -188,7 +188,7 @@ export default function Question({category, question, answers, socket, user, pla
         {answeringQuestion ? <div>
           <motion.h1 initial={{opacity: 0}} animate={{opacity: 1}} className="text-gray-500 font-bold text-4xl">{answeringQuestion.username} is answering...</motion.h1>
           <motion.h1 initial={{opacity: 0}} animate={{opacity: 1}} className="text-gray-100 font-bold text-4xl sm:text-2xl mx-10 mt-5 overflow-wrap" dangerouslySetInnerHTML={{__html: question}}></motion.h1>
-          <motion.div variants={Parent} initial="init" animate="load" className="mt-36 sm:mt-16 grid grid-cols-2 sm:grid-cols-1 h-64 mb-2 sm:overflow-auto">
+          <motion.div variants={Parent} initial="init" animate="load" className="mt-36 sm:mt-16 grid grid-cols-2 sm:grid-cols-1 mb-2">
             <AnimatePresence>
               {answers.map((v,i) => {
                 return <motion.button key={v} variants={Main} animate={correctAnswer && correctAnswer === v ? "correct" : answer === v ? "incorrect" : {backgroundColor: "rgb(75,85,99)"}} className="bg-gray-600 m-5 px-24 h-16 rounded-lg text-gray-100 font-medium min-h-0 min-w-0 focus:outline-none" dangerouslySetInnerHTML={{__html: v}}></motion.button>
@@ -209,7 +209,7 @@ export default function Question({category, question, answers, socket, user, pla
         : 
         <div>
           <motion.h1 initial={{opacity: 0}} animate={{opacity: 1}} className="text-gray-100 font-bold text-4xl sm:text-2xl mx-10 mt-5 overflow-wrap" dangerouslySetInnerHTML={{__html: question}}></motion.h1>
-          <motion.div variants={Parent} initial="init" animate="load" className="mt-36 sm:mt-16 grid grid-cols-2 sm:grid-cols-1 h-64 mb-2 sm:overflow-auto">
+          <motion.div variants={Parent} initial="init" animate="load" className="mt-36 sm:mt-16 grid grid-cols-2 sm:grid-cols-1 mb-2">
             <AnimatePresence>
               {answers.map((v,i) => {
                 return <motion.button key={v} onClick={() => handleClick(v)} variants={Main} animate={correctAnswer && correctAnswer === v ? "correct" : answer === v ? "incorrect" : {backgroundColor: "rgb(55,65,81)"}} className="bg-gray-700 m-5 px-24 h-16 rounded-lg text-gray-100 font-medium min-h-0 min-w-0 focus:outline-none" dangerouslySetInnerHTML={{__html: v}}></motion.button>

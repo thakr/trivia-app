@@ -14,7 +14,8 @@ function App() {
     <Router>
       <Switch>
         <Route path="/" exact component={Landing}></Route>
-        <Route path="/find-match" exact><FindMatch /></Route>
+        <Route path="/find-match" exact><FindMatch ranked={true}/></Route>
+        <Route path="/find-unranked" exact><FindMatch ranked={false}/></Route>
         <Route path="/custom-game" exact><CustomGame /></Route>
         <Route path="/game" exact component={Game}></Route>
         <Route path="/login" exact><Login defaultView="login" /></Route>

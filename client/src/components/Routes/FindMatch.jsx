@@ -8,7 +8,7 @@ import thbgloop from "../../sounds/thbgloop.mp3"
 import matchfound from "../../sounds/matchfound.mp3"
 const axios = require('axios')
 
-export default function FindMatch() {
+export default function FindMatch({ranked}) {
   const history = useHistory();
   const variants = {
     on: { opacity: 1 },
@@ -28,7 +28,7 @@ export default function FindMatch() {
     setUser(data)
   }
   const handleJoinQueue = () => {
-    socketRef.current.emit('matchmake',localStorage.getItem('token'))
+    socketRef.current.emit('matchmake',{token: localStorage.getItem('token'), ranked})
     setInQueue(true)
     if (!isPlaying) {
       sound.fade(0,0.5,1000)
@@ -65,7 +65,7 @@ export default function FindMatch() {
         if (timer === 0) {
           clearInterval(cdtimer)
           cleanup = false
-          history.push({pathname: '/game', leader: isLeader, socket: socket, user: userRef.current, ranked: false})
+          history.push({pathname: '/game', leader: isLeader, socket: socket, user: userRef.current, ranked: ranked})
         }
         timer --
       }, 1000)
@@ -111,7 +111,8 @@ export default function FindMatch() {
           <motion.h1 className={`font-bold text-white text-6xl sm:text-5xl`} animate={countdown ? "off" : "on"} variants={variants} transition={{duration: 0.25}}>{loading? <>Matchmaking</> : <>Match Found</>}</motion.h1>
           <BarLoader color="#ffffff" loading={loading} width={300} css={`margin-top:2em; border-radius:2px`}/>
         </>:<>
-        <h1 className="text-center text-7xl mb-10 font-bold"><span className="text-white">trivia</span><span className="text-blue-500">hit</span></h1>
+        <h1 className="text-center text-7xl mb-5 font-bold"><span className="text-white">trivia</span><span className="text-blue-500">hit</span></h1>
+        {ranked ? <h2 className="mb-5 text-red-500 font-semibold text-2xl">ranked</h2> : <h2 className="mb-5 text-green-500 font-semibold text-2xl">unranked</h2>}
         <div className="flex items-center justify-center sm:flex-col">
           <h2 className="font-bold text-white text-4xl sm:text-5xl mr-10 sm:mr-0 sm:mb-5">elo: {user && user.elo}</h2>
           <button onClick={handleJoinQueue} className="text-md outline-none focus:outline-none bg-gray-800 border-gray-800 text-gray-100 font-semibold px-4 py-2 rounded-xl shadow-md cursor-pointer hover:bg-gray-100 hover:border-gray-100 hover:text-gray-800 border-4 transition:ease-in-out duration-200 h-14 w-30 text-xl">join queue</button>

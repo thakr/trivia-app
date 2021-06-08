@@ -138,7 +138,7 @@ app.post('/api/login', (req,res) => {
 io.on('connection', (socket) => {
   //console.log('user connected '+ socket.id)
   let userData;
-  socket.on('matchmake', (token) => {
+  socket.on('matchmake', ({token,ranked}) => {
     jwt.verify(token, process.env.JWTSECRET, (err, decoded) => {
       if (err) {
         if (err instanceof jwt.TokenExpiredError) {
@@ -174,7 +174,7 @@ io.on('connection', (socket) => {
                   igplayers.push({id: similarEloArr[i+1].id, room: room, username: similarEloArr[i+1].username, elo: similarEloArr[i+1].elo, points: 0})
                   matchmakers.splice(matchmakers.indexOf(m => similarEloArr[i].id === m.id),1)
                   matchmakers.splice(matchmakers.indexOf(m => similarEloArr[i+1].id === m.id),1)
-                  igrooms.push({room, questions: [], index: 0, loadedPlayers: [], ranked:true})
+                  igrooms.push({room, questions: [], index: 0, loadedPlayers: [], ranked})
                 }
               }    
             }
@@ -204,14 +204,19 @@ io.on('connection', (socket) => {
         socket.emit('user-from-token', {username: userData.username, id: userData.id, elo: userData.elo})
         if (roomid) {
           const cmmfilter = custommatchmakers.filter(v => v.room === roomid)
-          if (cmmfilter.length > 0) {
-            socket.join(roomid)
-            cmmfilter[0].users[0].socket.emit('game-starting', true)
-            socket.emit('game-starting', false)
-            igplayers.push({id: cmmfilter[0].users[0].id, room: roomid, username: cmmfilter[0].users[0].username, elo: cmmfilter[0].users[0].elo, points: 0})
-            igplayers.push({id: userData.id, room: roomid, username: userData.username, elo: userData.elo, points: 0})
-            custommatchmakers.splice(custommatchmakers.indexOf(v => v.room === roomid),1)
-            igrooms.push({room:roomid, questions: [], index: 0, loadedPlayers: [], ranked:false})
+          if (cmmfilter.length === 1) {
+            if (userData.id !== cmmfilter[0].users[0].id) {
+              socket.join(roomid)
+              cmmfilter[0].users[0].socket.emit('game-starting', true)
+              socket.emit('game-starting', false)
+              igplayers.push({id: cmmfilter[0].users[0].id, room: roomid, username: cmmfilter[0].users[0].username, elo: cmmfilter[0].users[0].elo, points: 0})
+              igplayers.push({id: userData.id, room: roomid, username: userData.username, elo: userData.elo, points: 0})
+              custommatchmakers.splice(custommatchmakers.indexOf(v => v.room === roomid),1)
+              igrooms.push({room:roomid, questions: [], index: 0, loadedPlayers: [], ranked:false})
+            } else {
+              socket.emit('same-person')
+            }
+            
           } else {
             socket.emit('no-room-found')
           }

@@ -36,6 +36,9 @@ export default function CustomGame() {
     socket.on('no-room-found', () => {
       setInvalidLink(true)
     })
+    socket.on('same-person', () => {
+      setInvalidLink(true)
+    })
     socket.on('game-starting', (isLeader) => {
       setLoading(false)
       let timer = 3
