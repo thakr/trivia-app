@@ -21,27 +21,27 @@ export default function Dashboard() {
   }, [])
   const [user, setUser] = useState()
   const [view, setView] = useState()
-  const [homeColor, setHomeColor] = useState("000000")
-  const [shopColor, setShopColor] = useState("000000")
+  const [homeColor, setHomeColor] = useState("f3f4f6")
+  const [shopColor, setShopColor] = useState("f3f4f6")
 
 
   return (
-    <div className="flex h-screen w-screen bg-gradient-to-r from-blue-500 to-gray-100 items-center justify-center overflow-auto">
-      <motion.div initial={{x:-100}} animate={{x:0}} className="absolute left-5 bg-white bg-opacity-90 p-5 rounded-xl shadow-lg text-center z-10">
+    <div className="flex h-screen w-screen bg-gray-900 to-gray-100 items-center justify-center overflow-auto">
+      <motion.div initial={{x:-100}} animate={{x:0}} className="absolute left-5 bg-gray-800 bg-opacity-90 p-5 rounded-xl shadow-lg text-center z-10">
         <div><motion.button initial={{y:0}} whileHover={{y:-10}} className="focus:outline-none" onClick={() => {
           setView(<Home user={user} />)
           setHomeColor("3b82f6")
-          setShopColor("000000")
+          setShopColor("f3f4f6")
         }}><img src={`https://img.icons8.com/small/32/${homeColor}/home.png`} className="my-2" alt="home"/></motion.button></div>
         <div><motion.button initial={{y:0}} whileHover={{y:-10}} className="focus:outline-none" onClick={() => {
           setView(<Shop user={user} />)
           setShopColor("3b82f6")
-          setHomeColor("000000")
+          setHomeColor("f3f4f6")
         }}><img src={`https://img.icons8.com/small/32/${shopColor}/shopping-bag.png`} className="my-2" alt="shop" /></motion.button></div>
         <div><motion.button initial={{y:0}} whileHover={{y:-10}} className="focus:outline-none" onClick={() => {
           localStorage.removeItem("token")
           window.open('/', '_self')
-        }}><img src="https://img.icons8.com/small/32/000000/exit.png" alt="log out" className="my-2"/></motion.button></div>
+        }}><img src="https://img.icons8.com/small/32/f3f4f6/exit.png" alt="log out" className="my-2"/></motion.button></div>
       </motion.div>
       {view ? view : <BeatLoader color="white" />}
     </div>

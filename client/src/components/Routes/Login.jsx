@@ -64,28 +64,28 @@ export default function Login({defaultView}) {
   }
   let history = useHistory()
   return (
-    <div className="min-w-screen min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-500 to-gray-100">
-      <div className="bg-gray-100 shadow-xl rounded-xl py-16 px-24 sm:px-8">
+    <div className="min-w-screen min-h-screen flex items-center justify-center bg-gray-900">
+      <div className="bg-gray-800 shadow-xl rounded-xl py-16 px-24 sm:px-8">
       <h1 className="font-bold text-7xl bg-gradient-to-r from-red-500 to-blue-700 bg-clip-text text-transparent pb-5">{view}</h1>
       {errorTxt && <AlertError msg={errorTxt} removeAlert={() => setErrorTxt()}/>}
       {view === "login" ? <>
         <form onSubmit={handleLogin}>
-          <input required maxLength="27" value={email} onChange={(e) => setEmail(e.target.value)} type="email" placeholder="email" className="px-2 py-2 ring-blue-500 rounded-lg border-gray-200 border focus:outline-none focus:ring-1 transition ease-in-out duration-200 mt-5 mb-2 w-64 "></input> <br />
-          <input required maxLength="27" value={password} onChange={(e) => setPassword(e.target.value)} type="password" placeholder="password" className="px-2 py-2 ring-blue-500 rounded-lg border-gray-200 border focus:outline-none focus:ring-1 transition ease-in-out duration-200 my-2 w-64 "></input> <br />
-          <motion.button disabled={sending} whileHover={!sending && {backgroundPosition: "right"}} type="submit" className="cursor-pointer disabled:cursor-not-allowed text-md text-gray-100 border-blue-500 font-semibold focus:outline-none w-64 px-2 py-2 my-2 rounded-lg shadow-md disabled:bg-gradient-to-r disabled:from-gray-400 disabled:to-gray-300" style={!sending && {backgroundImage: "linear-gradient(75deg, #3b82f6, #93c5fd,#93c5fd,#3b82f6", backgroundSize: "300%", backgroundPosition: "left", transition: "300ms background-position ease-in-out"}}>{sending ? <BeatLoader color="white" size={10}/> : <>log in</>}</motion.button> <br />
+          <input required maxLength="27" value={email} onChange={(e) => setEmail(e.target.value)} type="email" placeholder="email" className="px-2 py-2 ring-blue-500 rounded-lg bg-gray-700 border-gray-700 text-gray-100 border focus:outline-none focus:ring-1 transition ease-in-out duration-200 mt-5 mb-2 w-64 "></input> <br />
+          <input required maxLength="27" value={password} onChange={(e) => setPassword(e.target.value)} type="password" placeholder="password" className="px-2 py-2 ring-blue-500 rounded-lg bg-gray-700 border-gray-700 text-gray-100 border focus:outline-none focus:ring-1 transition ease-in-out duration-200 my-2 w-64 "></input> <br />
+          <motion.button disabled={sending} whileHover={!sending && {backgroundPosition: "right"}} type="submit" className="cursor-pointer disabled:cursor-not-allowed text-md text-gray-100 border-blue-500 font-semibold focus:outline-none w-64 px-2 py-2 my-2 rounded-lg shadow-md disabled:bg-gradient-to-r disabled:from-gray-700 disabled:to-gray-600" style={!sending && {backgroundImage: "linear-gradient(75deg, #3b82f6, #93c5fd,#93c5fd,#3b82f6", backgroundSize: "300%", backgroundPosition: "left", transition: "300ms background-position ease-in-out"}}>{sending ? <BeatLoader color="white" size={10}/> : <>log in</>}</motion.button> <br />
         </form>
-        <p className="mt-2 text-gray-500">Need an account?</p> <p className="cursor-pointer text-lg text-gray-600 hover:text-gray-800 transition-colors ease-in-out duration-200 mb-5" onClick={() =>{ history.push('/signup'); setView('sign up')}}>sign up</p>
+        <p className="mt-2 text-gray-400">Need an account?</p> <p className="cursor-pointer text-lg text-gray-300 hover:text-white transition-colors ease-in-out duration-200 mb-5 w-16" onClick={() =>{ history.push('/signup'); setView('sign up')}}>sign up</p>
       </> : <>
         <form onSubmit={handleSignup}>
-          <input required maxLength="27" value={username} onChange={(e) => setUsername(e.target.value)} type="text" placeholder="username" className="px-2 py-2 ring-blue-500 rounded-lg border-gray-200 border focus:outline-none focus:ring-1 transition ease-in-out duration-200 mt-5 mb-2 w-64 "></input> <br />
-          <input required type="email" placeholder="email" value={email} onChange={(e) => setEmail(e.target.value)} className="px-2 py-2 ring-blue-500 rounded-lg border-gray-200 border focus:outline-none focus:ring-1 transition ease-in-out duration-200 my-2 w-64 "></input> <br />
-          <input required maxLength="27" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="password" className="px-2 py-2 ring-blue-500 rounded-lg border-gray-200 border focus:outline-none focus:ring-1 transition ease-in-out duration-200 my-2 w-64 "></input> <br />
-          <motion.button disabled={sending} whileHover={!sending && {backgroundPosition: "right"}} type="submit" className="cursor-pointer disabled:cursor-not-allowed text-md text-gray-100 border-blue-500 font-semibold focus:outline-none w-64 px-2 py-2 my-2 rounded-lg shadow-md disabled:bg-gradient-to-r disabled:from-gray-400 disabled:to-gray-300" style={!sending && {backgroundImage: "linear-gradient(75deg, #3b82f6, #93c5fd,#93c5fd,#3b82f6", backgroundSize: "300%", backgroundPosition: "left", transition: "300ms background-position ease-in-out"}}>{sending ? <BeatLoader color="white" size={10}/> : <>sign up</>}</motion.button> <br />
+          <input required maxLength="27" value={username} onChange={(e) => setUsername(e.target.value)} type="text" placeholder="username" className="px-2 py-2 ring-blue-500 rounded-lg bg-gray-700 border-gray-700 text-gray-100 border focus:outline-none focus:ring-1 transition ease-in-out duration-200 mt-5 mb-2 w-64 "></input> <br />
+          <input required type="email" placeholder="email" value={email} onChange={(e) => setEmail(e.target.value)} className="px-2 py-2 ring-blue-500 rounded-lg bg-gray-700 border-gray-700 text-gray-100 border focus:outline-none focus:ring-1 transition ease-in-out duration-200 my-2 w-64 "></input> <br />
+          <input required maxLength="27" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="password" className="px-2 py-2 ring-blue-500 rounded-lg bg-gray-700 border-gray-700 text-gray-100 border focus:outline-none focus:ring-1 transition ease-in-out duration-200 my-2 w-64 "></input> <br />
+          <motion.button disabled={sending} whileHover={!sending && {backgroundPosition: "right"}} type="submit" className="cursor-pointer disabled:cursor-not-allowed text-md text-gray-100 border-blue-500 font-semibold focus:outline-none w-64 px-2 py-2 my-2 rounded-lg shadow-md disabled:bg-gradient-to-r disabled:from-gray-700 disabled:to-gray-600" style={!sending && {backgroundImage: "linear-gradient(75deg, #3b82f6, #93c5fd,#93c5fd,#3b82f6", backgroundSize: "300%", backgroundPosition: "left", transition: "300ms background-position ease-in-out"}}>{sending ? <BeatLoader color="white" size={10}/> : <>sign up</>}</motion.button> <br />
         </form>
-        <p className="mt-2 text-gray-500 text-md">Have an account?</p> <p className="cursor-pointer text-gray-600 text-lg hover:text-gray-800 transition-colors ease-in-out duration-200 mb-5" onClick={() => {history.push('/login'); setView('login')}}>log in</p>   
+        <p className="mt-2 text-gray-400 text-md">Have an account?</p> <p className="cursor-pointer text-gray-300 text-lg hover:text-white transition-colors ease-in-out duration-200 mb-5 w-16" onClick={() => {history.push('/login'); setView('login')}}>log in</p>   
       </>}
       <div className="w-full text-center">
-        <a className="text-gray-600 hover:text-gray-800 transition-colors ease-in-out duration-200 text-xl" href="/">home</a>
+        <a className="text-gray-200 hover:text-gray-800 transition-colors ease-in-out duration-200 text-xl" href="/">home</a>
       </div>
       </div>
     </div>

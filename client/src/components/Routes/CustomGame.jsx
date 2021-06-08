@@ -1,8 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react'
 import queryString from 'query-string'
 import { useHistory, useLocation } from "react-router-dom";
-import { motion } from "framer-motion"
+import { AnimatePresence, motion } from "framer-motion"
+import BarLoader from "react-spinners/BarLoader";
 import io from 'socket.io-client'
+import CopiedBox from '../CopiedBox'
 
 export default function CustomGame() {
   const history = useHistory();
@@ -16,11 +18,17 @@ export default function CustomGame() {
   const [countdown, setCountdown] = useState()
   const [user, setUser] = useState()
   const [link, setLink] = useState()
+  const [showCopied, setShowCopied] = useState(false)
   const [invalidLink, setInvalidLink] = useState(false)
   const userRef = useRef(user)
   const _setUser = data => {
     userRef.current = data
     setUser(data)
+  }
+  const copyText = () => {
+    navigator.clipboard.writeText(link); 
+    setShowCopied(true)
+    setTimeout(() => setShowCopied(false), 1000)
   }
   useEffect(() => {
     let socket = io(process.env.NODE_ENV === 'development' ? 'http://localhost:8080/' : '/')
@@ -75,10 +83,14 @@ export default function CustomGame() {
   }, [])
   return (
     <>
-      <motion.div initial={{opacity: 0}} animate={{opacity: 1}} className="flex flex-col bg-gray-900 min-h-screen items-center justify-center">      
+      <AnimatePresence>
+        {showCopied && <CopiedBox />}
+      </AnimatePresence> 
+      <motion.div initial={{opacity: 0}} animate={{opacity: 1}} className="flex flex-col bg-gray-900 min-h-screen items-center justify-center">    
         {countdown && <motion.h2 className="absolute font-semibold text-8xl text-gray-100" initial={{scale: 0}} animate={{scale: 1}}>{countdown}</motion.h2>}
-        <motion.h1 className={`font-bold text-white text-6xl sm:text-5xl text-center`} animate={countdown ? "off" : "on"} variants={variants} transition={{duration: 0.25}}>{invalidLink ? <span className="text-red-500">That link is invalid :(</span> : loading? <>Waiting for player...</> : <>Game Starting</>}</motion.h1>
-        {!queryString.parse(location.search).roomid && <motion.h2 className={`font-bold text-white text-3xl sm:text-2xl mt-5 text-center`} animate={countdown ? "off" : "on"} variants={variants} transition={{duration: 0.25}}>Share this link with a friend: {link ? <span className="text-green-400 overflow-wrap">{link}</span> : "..."}</motion.h2>}
+        <motion.h1 className={`font-bold text-white text-6xl sm:text-5xl text-center`} animate={countdown ? "off" : "on"} variants={variants} transition={{duration: 0.25}}>{invalidLink ? <span className="text-red-500">That link is invalid :(</span> : loading? <>Waiting for opponent</> : <>Game Starting</>}</motion.h1>
+        {!invalidLink && <BarLoader color="#ffffff" loading={loading} width={300} css={`margin-top:2em; margin-bottom:1em; border-radius:2px`}/>}
+        {!queryString.parse(location.search).roomid && <motion.p className={`font-medium text-white text-2xl sm:text-2xl mt-5 text-center`} animate={countdown ? "off" : "on"} variants={variants} transition={{duration: 0.25}}>Share this link with a friend: {link ? <span className="text-green-400 overflow-wrap cursor-pointer hover:text-green-300 transition-colors ease-in-out duration-200 " onClick={copyText}>{link}</span> : "..."}</motion.p>}
         {invalidLink && <a className="mt-5 text-gray-300 hover:text-gray-100 transition-colors ease-in-out duration-200 font-medium" href="/dashboard">dashboard</a>}
       </motion.div>
     </>
